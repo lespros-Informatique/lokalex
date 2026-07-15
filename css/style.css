@@ -152,6 +152,14 @@ html, body {
     color: var(--primary-dark);
 }
 
+.header-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: block;
+    margin-bottom: 8px;
+}
+
 .header-subtitle {
     font-size: 14px;
     color: var(--text-light);
