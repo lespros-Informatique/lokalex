@@ -951,7 +951,7 @@ html, body {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease, transform 0.3s ease;
-    z-index: 200;
+    z-index: 9999;
     max-width: 90%;
     text-align: center;
     display: flex;

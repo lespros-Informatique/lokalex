@@ -757,6 +757,21 @@
         color: var(--danger);
     }
 
+    .list-item.out-of-stock {
+        opacity: 0.95;
+        border: 1px solid var(--danger-light);
+        background: var(--danger-light);
+    }
+
+    .list-item.out-of-stock .list-item-title {
+        color: var(--danger);
+    }
+
+    .list-item-amount.out-of-stock-qty {
+        color: var(--danger);
+        font-weight: 700;
+    }
+
     .list-item-actions {
         display: flex;
         align-items: center;
@@ -1455,7 +1470,7 @@
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease, transform 0.3s ease;
-        z-index: 300;
+        z-index: 9999;
         max-width: 90%;
         text-align: center;
         display: flex;
