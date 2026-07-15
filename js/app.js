@@ -539,14 +539,15 @@ const app = {
     },
 
     async desactiverArticle(code) {
-        if (!confirm('Désactiver cet article ?')) return;
-        try {
-            await this.api('/articles/desactiver', { method: 'POST', body: JSON.stringify({ code_article: code }) });
-            this.toast('Article désactivé', 'success');
-            this.renderArticles();
-        } catch (err) {
-            this.toast(err.message, 'error');
-        }
+        this.openConfirm('Confirmation', 'Désactiver cet article ?', async () => {
+            try {
+                await this.api('/articles/desactiver', { method: 'POST', body: JSON.stringify({ code_article: code }) });
+                this.toast('Article désactivé', 'success');
+                this.renderArticles();
+            } catch (err) {
+                this.toast(err.message, 'error');
+            }
+        });
     },
 
     async loadCategorieOptions(selectId) {
@@ -554,7 +555,7 @@ const app = {
         if (!select) return;
         try {
             const data = await this.api('/categories');
-            const categories = data.data.categories || [];
+            const categories = data.data.items || [];
             select.innerHTML = '<option value="">Sans catégorie</option>' + categories.map(c =>
                 `<option value="${this.escapeHtml(c.code_categorie)}">${this.escapeHtml(c.libelle_categorie)}</option>`
             ).join('');
@@ -1393,7 +1394,7 @@ const app = {
             let forfaitOptions = '';
             try {
                 const fData = await this.api('/dev/forfaits');
-                forfaitOptions = (fData.data.forfaits || []).map(f => `<option value="${this.escapeHtml(f.code_forfait)}">${this.escapeHtml(f.libelle_forfait)} (${this.formatMoney(parseFloat(f.prix_forfait))})</option>`).join('');
+                forfaitOptions = (fData.data.items || []).map(f => `<option value="${this.escapeHtml(f.code_forfait)}">${this.escapeHtml(f.libelle_forfait)} (${this.formatMoney(parseFloat(f.prix_forfait))})</option>`).join('');
             } catch (e) { /* ignore */ }
             const abonnement = data.data.abonnement;
             const forfait = data.data.forfait;
@@ -1535,7 +1536,7 @@ const app = {
         if (!select) return;
         try {
             const data = await this.api('/dev/forfaits');
-            const forfaits = data.data.forfaits;
+            const forfaits = data.data.items || [];
             select.innerHTML = forfaits.map(f => `<option value="${this.escapeHtml(f.code_forfait)}" ${f.code_forfait === selectedCode ? 'selected' : ''}>${this.escapeHtml(f.libelle_forfait)} (${this.formatMoney(parseFloat(f.prix_forfait))})</option>`).join('');
         } catch (err) { this.toast(err.message, 'error'); }
     },
@@ -1692,8 +1693,14 @@ const app = {
         });
     },
 
-    openConfirm() { const m = document.getElementById('confirm-modal'); if (m) m.classList.add('open'); },
-    closeConfirm() { const m = document.getElementById('confirm-modal'); if (m) m.classList.remove('open'); this.pendingDelete = null; },
+    openConfirm(title, message, callback) {
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-message').textContent = message;
+        this.confirmCallback = callback;
+        document.getElementById('confirm-modal').classList.add('open');
+    },
+    closeConfirm() { const m = document.getElementById('confirm-modal'); if (m) m.classList.remove('open'); this.pendingDelete = null; this.confirmCallback = null; },
+    confirmOk() { const cb = this.confirmCallback; this.closeConfirm(); if (cb) cb(); },
 
     handleMenuDownload() {
         this.closeTopMenu();
