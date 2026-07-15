@@ -1136,6 +1136,15 @@ html, body {
     animation: slideUp 0.25s ease;
 }
 
+#location-detail-sheet,
+#client-detail-sheet,
+#user-detail-sheet {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
 @keyframes slideUp {
     from { transform: translateY(40px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
