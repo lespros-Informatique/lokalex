@@ -1104,7 +1104,12 @@ const app = {
             const p = parseFloat(row.querySelector('.ligne-prix').value) || 0;
             montant += q * p;
         });
-        const avance = parseFloat(document.getElementById('location-avance').value) || 0;
+        const avanceInput = document.getElementById('location-avance');
+        let avance = parseFloat(avanceInput.value) || 0;
+        if (avance > montant) {
+            avance = montant;
+            avanceInput.value = montant;
+        }
         const reste = Math.max(0, montant - avance);
         document.getElementById('location-reste').textContent = this.formatMoney(reste);
     },
@@ -1116,7 +1121,7 @@ const app = {
         const dateSortie = document.getElementById('location-date-sortie').value;
         const dateRetour = document.getElementById('location-date-retour').value;
         if (!dateSortie || !dateRetour) { this.toast('Dates requises', 'error'); return; }
-        if (new Date(dateRetour) <= new Date(dateSortie)) { this.toast('La date de retour doit être après la date de sortie', 'error'); return; }
+        if (new Date(dateRetour) < new Date(dateSortie)) { this.toast('La date de retour doit être égale ou après la date de sortie', 'error'); return; }
         const lignes = [];
         let montant = 0;
         document.querySelectorAll('#location-lignes .ligne-row').forEach(row => {
@@ -1132,6 +1137,7 @@ const app = {
         if (!lignes.length) { this.toast('Ajoutez au moins un article', 'error'); return; }
         const avance = parseFloat(document.getElementById('location-avance').value) || 0;
         if (avance < 0) { this.toast('Avance invalide', 'error'); return; }
+        if (avance > montant) { this.toast('L\'avance ne peut pas dépasser le montant à payer', 'error'); return; }
         const payload = {
             client_code: clientCode,
             date_sortie: dateSortie,

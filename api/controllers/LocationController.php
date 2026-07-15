@@ -72,6 +72,9 @@ class LocationController extends Controller
         if (!$dateRetour) {
             Response::error('Date de retour prévue requise');
         }
+        if (strtotime($dateRetour) < strtotime($dateSortie)) {
+            Response::error('La date de retour doit être égale ou après la date de sortie', [], 400);
+        }
 
         $lignes = $this->input('lignes', []);
         if (!is_array($lignes) || count($lignes) === 0) {
@@ -109,6 +112,12 @@ class LocationController extends Controller
         }
 
         $avance = (float) $this->input('avance', 0);
+        if ($avance < 0) {
+            Response::error('Avance invalide', [], 400);
+        }
+        if ($avance > $montant) {
+            Response::error('L\'avance ne peut pas dépasser le montant dû (' . number_format($montant, 0, '', ' ') . ' F)', [], 400);
+        }
         $reste = max(0, $montant - $avance);
 
         $codeLocation = 'LOC' . time() . mt_rand(100, 999);
