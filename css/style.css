@@ -61,18 +61,22 @@
     --success: #16A34A;
     --success-light: #DCFCE7;
     --text-success: #15803D;
+    --bg-success: #DCFCE7;
 
     --warning: #F59E0B;
     --warning-light: #FEF3C7;
     --text-warning: #B45309;
+    --bg-warning: #FEF3C7;
 
     --danger: #DC2626;
     --danger-dark: #B91C1C;
     --danger-light: #FEE2E2;
+    --bg-danger-light: #FEF2F2;
 
     --info: #2563EB;
     --info-light: #DBEAFE;
     --text-info: #1D4ED8;
+    --bg-info: #DBEAFE;
 
     /* Ombres */
     --shadow: rgba(0, 0, 0, 0.06);

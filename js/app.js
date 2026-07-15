@@ -1286,14 +1286,26 @@ const app = {
                 const fData = await this.api('/dev/forfaits');
                 forfaitOptions = (fData.data.forfaits || []).map(f => `<option value="${this.escapeHtml(f.code_forfait)}">${this.escapeHtml(f.libelle_forfait)} (${this.formatMoney(parseFloat(f.prix_forfait))})</option>`).join('');
             } catch (e) { /* ignore */ }
-            const txHtml = transactions.map(tx => `
+            const abonnement = data.data.abonnement;
+            const forfait = data.data.forfait;
+            const txHtml = transactions.length ? transactions.map(tx => `
                 <div class="list-item" onclick="${tx.type === 'location' ? `app.openLocationDetail('${this.escapeHtml(tx.id)}')` : ''}">
                     <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(tx.title || 'Location')}</div><div class="list-item-meta">${this.escapeHtml(this.formatFrenchDate(tx.date))} • ${this.escapeHtml(tx.mode)}</div></div>
                     <span class="list-item-amount">${this.formatMoney(tx.amount)}</span>
-                </div>`).join('');
+                </div>`).join('') : '<div class="empty-state">Aucune location</div>';
+            const statutMap = { en_attente: ['En attente', 'badge-en_attente'], actif: ['Actif', 'badge-actif'], expire: ['Expiré', 'badge-expire'], suspendu: ['Suspendu', 'badge-suspendu'] };
+            const [statutLabel, statutCls] = (abonnement ? (statutMap[abonnement.statut_abonnement] || [abonnement.statut_abonnement, 'badge-inactif']) : ['Aucun', 'badge-inactif']);
+            const abonnementHtml = abonnement ? `
+                <div class="detail-item"><span>Forfait</span><strong>${this.escapeHtml(forfait?.libelle_forfait || abonnement.forfait_code || '-')}</strong></div>
+                <div class="detail-item"><span>Début</span><strong>${this.escapeHtml(abonnement.date_debut_abonnement || '-')}</strong></div>
+                <div class="detail-item"><span>Fin</span><strong>${this.escapeHtml(abonnement.date_fin_abonnement || '-')}</strong></div>
+                <div class="detail-item"><span>Montant</span><strong>${this.formatMoney(parseFloat(abonnement.montant_abonnement || 0))}</strong></div>
+                <div class="detail-item"><span>Statut</span><span class="badge ${statutCls}">${this.escapeHtml(statutLabel)}</span></div>
+            ` : '<div class="empty-state">Aucun abonnement</div>';
             sheet.innerHTML = `
                 <div class="modal-header"><h3>Détail boutique</h3><button class="modal-close" onclick="app.closeUserDetail()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
                 <div class="modal-body">
+                    <div class="detail-section"><h4 class="detail-title">Abonnement</h4><div class="detail-grid">${abonnementHtml}</div></div>
                     <div class="detail-section"><h4 class="detail-title">Totaux</h4><div class="detail-grid">
                         <div class="detail-item"><span>Montant</span><strong>${totals.sales || '0 F'}</strong></div>
                         <div class="detail-item"><span>Reste</span><strong>${totals.expenses || '0 F'}</strong></div>
@@ -1303,7 +1315,7 @@ const app = {
                         <select id="shop-reabonnement-forfait" class="abonnement-statut">${forfaitOptions}</select>
                         <button class="btn btn-primary" onclick="app.reabonnement('${this.escapeHtml(shop.code_boutique)}', document.getElementById('shop-reabonnement-forfait').value)">Réabonner</button>
                     </div></div>
-                    <div class="detail-section"><h4 class="detail-title">Locations</h4><div id="shop-detail-transactions" class="detail-transactions-scroll">${txHtml || '<div class="empty-state">Aucune location</div>'}</div>
+                    <div class="detail-section"><h4 class="detail-title">Locations</h4><div id="shop-detail-transactions" class="detail-transactions-scroll">${txHtml}</div>
                         <button class="btn-load-more" id="shop-detail-load-more" style="display:${this.shopTxHasMore ? 'flex' : 'none'}; margin: 12px 20px 8px;" onclick="app.loadMoreShopTransactions()">Charger plus</button></div>
                 </div>`;
         } catch (err) {

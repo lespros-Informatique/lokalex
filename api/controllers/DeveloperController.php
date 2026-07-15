@@ -346,8 +346,16 @@ class DeveloperController extends Controller
         $totalReste = array_sum(array_column($locations, 'reste_location'));
         $totalEncaisse = $totalMontant - $totalReste;
 
+        $abonnement = Abonnement::findActiveByBoutique($shopCode);
+        $forfait = null;
+        if ($abonnement && !empty($abonnement['forfait_code'])) {
+            $forfait = Forfait::findByCode($abonnement['forfait_code']);
+        }
+
         Response::success('Détail boutique', [
             'shop' => $shop,
+            'abonnement' => $abonnement,
+            'forfait' => $forfait,
             'transactions' => $transactions,
             'totals' => [
                 'sales' => $this->formatMoney($totalMontant),
