@@ -1,353 +1,358 @@
-# PROMPT D'IMPLÉMENTATION – NAFA
+Tu es un développeur senior full-stack chargé de transformer un ancien projet appelé NAFA en un nouveau projet appelé LOKALEX.
 
-## Contexte
+CONTEXTE :
+Le projet actuel est une ancienne version (NAFA). Le nouveau projet est LOKALEX.
 
-Tu es un développeur Full Stack senior et UX Designer.
+La base de données officielle du nouveau projet est déjà présente dans :
+sql/db.sql
 
-Tu dois développer **NAFA**, une application SaaS web responsive (Mobile First) destinée aux petits commerçants africains.
+Cette nouvelle base est légèrement similaire à l'ancien projet, mais elle contient les nouvelles règles métier.
 
-Le projet doit être pensé comme un **produit extrêmement simple**, moderne et rapide.
+Ta mission :
+Analyser entièrement le projet existant (structure, backend, frontend, modèles, contrôleurs, vues, API, scripts SQL), puis adapter le code pour correspondre exactement au nouveau projet LOKALEX.
 
-NAFA **n'est PAS** un logiciel de gestion commerciale, ni un ERP, ni un logiciel de stock.
+IMPORTANT :
+- Ne réutilise pas aveuglément l'ancien fonctionnement NAFA.
+- La nouvelle base db.sql est la seule source de vérité.
+- Tu dois adapter le code aux nouvelles tables, relations et champs présents dans db.sql.
+- N'invente aucune table, aucun champ, aucun module qui n'existe pas dans la base.
+- Ne crée pas de fonctionnalités inutiles.
+- Le projet est un MVP, donc rester simple, rapide et efficace.
+- Conserve la structure et les bonnes pratiques déjà présentes dans le projet quand elles sont compatibles.
+- Le résultat doit être propre, maintenable et prêt pour une évolution future.
 
-La philosophie du produit est :
+==================================================
+OBJECTIF DU PRODUIT : LOKALEX
+==================================================
 
-> **"Une calculatrice intelligente qui garde l'historique des ventes."**
+Lokalex est une application simple de gestion de location de matériel pour les commerçants.
 
-L'utilisateur doit pouvoir apprendre toute l'application en moins de **30 secondes**.
+Le commerçant doit pouvoir :
+- gérer son matériel disponible à la location ;
+- gérer ses clients ;
+- créer une location rapidement ;
+- suivre les retours ;
+- suivre les paiements.
 
-Chaque action importante doit prendre moins de **3 secondes**.
+==================================================
+GESTION DES COMPTES ET ABONNEMENTS
+==================================================
 
-L'interface doit être minimaliste.
+Le système d'administration garde le même principe :
 
-Ne jamais ajouter des fonctionnalités non demandées.
+Un administrateur :
+- crée les formules d'abonnement ;
+- crée les comptes utilisateurs/vendeurs ;
+- attribue une formule à chaque vendeur.
 
----
+Le vendeur :
+- se connecte uniquement à son espace ;
+- ne gère pas les abonnements ;
+- ne voit que ses propres données.
 
-# Objectif
+Ne pas modifier ce principe.
 
-Le commerçant veut simplement connaître :
+==================================================
+ESPACE VENDEUR
+==================================================
 
-* combien il a vendu aujourd'hui
-* combien il a dépensé
-* combien il lui reste
-* son évolution
+Créer/adapter uniquement les modules nécessaires au MVP.
 
-L'application doit répondre uniquement à ce besoin.
+--------------------------------------------------
+1. TABLEAU DE BORD
+--------------------------------------------------
 
----
+À la connexion, le vendeur voit :
 
-# Base de données
+KPIs :
 
-Utiliser exclusivement la base SQL fournie.
+📦 Nombre de locations en cours
 
-Ne pas modifier la structure.
+📅 Retours prévus aujourd'hui
 
-Respecter les clés métier (`code_user`, `code_boutique`, etc.).
+💰 Montant des locations du jour
 
-Toutes les relations se font avec les codes métier.
+👥 Nombre de clients
 
----
+⚠️ Locations en retard
 
-# Identité visuelle
 
-Nom :
+En dessous :
 
-NAFA
+Afficher les 10 dernières locations.
 
-Signification :
+Les statistiques doivent être calculées uniquement avec les données 
 
-Profit – Bénéfice – Gain.
+--------------------------------------------------
+2. ARTICLES
+--------------------------------------------------
 
-Couleurs :
+Gestion du matériel disponible à la location.
 
-Couleur principale :
+Informations :
 
-#16A34A
+- Nom
+- Catégorie
+- Quantité totale
+- Quantité disponible
+- Prix de location (si prévu dans la base)
+- Statut
 
-Blanc :
 
-#FFFFFF
+Actions :
 
-Vert foncé :
+- Ajouter un article
+- Modifier un article
+- Désactiver un article
 
-#166534
 
-Vert clair :
+Exemples :
 
-#DCFCE7
+Chaise plastique
+500 disponibles
 
-Aucun dégradé.
+Table
+80 disponibles
 
-Aucun effet inutile.
+Bâche
+12 disponibles
 
-Aucune interface chargée.
+Marmite
+25 disponibles
 
-Police :
 
-Poppins.
+Lorsqu'une location est créée :
+➡️ le stock disponible diminue automatiquement.
 
-Style :
 
-Simple
+Lorsqu'un retour est effectué :
+➡️ le stock disponible augmente automatiquement.
 
-Professionnel
 
-Épuré
+Respecter la logique de stock définie dans db.sql.
 
-Moderne
+--------------------------------------------------
+3. CLIENTS
+--------------------------------------------------
 
-Beaucoup d'espaces blancs.
+Gestion simple des clients.
 
----
+Informations :
 
-# Responsive
+- Nom
+- Téléphone
+- Adresse (si disponible dans la base)
 
-Priorité absolue au mobile.
 
-L'application doit être parfaite sur smartphone.
+Fonctions :
 
-Puis tablette.
+- Ajouter un client
+- Rechercher un client
+- Voir son historique
 
-Puis desktop.
 
----
+Historique client :
 
-# Fonctionnalités V1
+- Nombre de locations
+- Montant total payé/loué selon la structure de la base
 
-Aucune autre fonctionnalité ne doit être ajoutée.
 
-## 1. Authentification
+Lors d'une nouvelle location :
 
-Connexion par téléphone.
+Le vendeur recherche le client.
 
-Sélection de la boutique.
+Si le client existe :
+➡️ il est sélectionné.
 
-Ouverture de session de caisse.
+Si le client n'existe pas :
+➡️ création rapide du client directement depuis la location.
 
----
+--------------------------------------------------
+4. NOUVELLE LOCATION
+--------------------------------------------------
 
-## 2. Tableau de bord
+Processus rapide :
 
-Le tableau de bord est le cœur de l'application.
+1. Choisir le client.
 
-Afficher :
+2. Ajouter les articles :
 
-Ventes du jour
+Exemple :
 
-Dépenses du jour
+100 chaises
 
-Net du jour
+20 tables
 
-Nombre de ventes
+2 bâches
 
-Répartition :
 
-Espèces
+3. Ajouter :
 
-Wave
+- Date de sortie
+- Date de retour prévue
+- Montant
+- Avance
+- Reste à payer
 
-Orange Money
 
-MTN
+Puis :
 
-Moov
+Enregistrer.
 
-Carte
 
-Deux gros boutons :
+Après validation :
 
-➕ Vente
+- créer la location ;
+- enregistrer les lignes de location ;
+- diminuer automatiquement le stock.
 
-➖ Dépense
 
-Aucun graphique compliqué.
+Ne pas ajouter de processus complexe.
 
----
+--------------------------------------------------
+5. LOCATIONS
+--------------------------------------------------
 
-## 3. Nouvelle vente
+Afficher toutes les locations du vendeur.
 
-Écran extrêmement simple.
+Recherche :
 
-Montant
+- Nom client
+- Téléphone
+- Statut
 
-Mode de paiement
+
+Chaque ligne affiche :
+
+- Client
+- Date
+- Montant
+- Reste à payer
+- Statut
+
+
+Statuts :
+
+🟢 En cours
+
+🔵 Terminée
+
+🔴 En retard
+
+
+Les statuts doivent respecter les valeurs prévues dans la base.
+
+--------------------------------------------------
+6. RETOUR MATÉRIEL
+--------------------------------------------------
+
+Depuis une location :
 
 Bouton :
 
-Enregistrer
+Retour
 
-Une vente doit pouvoir être enregistrée en moins de trois secondes.
 
-Aucun article.
+Le vendeur indique les quantités retournées :
 
-Aucun client.
+Exemple :
 
-Aucune TVA.
+100 chaises
 
-Aucune remise.
+20 tables
 
-Aucun stock.
+2 bâches
 
----
 
-## 4. Dépenses
+Après validation :
 
-Formulaire :
+- augmenter le stock ;
+- mettre à jour la location ;
+- changer le statut si tout est retourné.
 
-Libellé
 
-Montant
+--------------------------------------------------
+7. PAIEMENTS
+--------------------------------------------------
 
-Bouton :
+Depuis une location :
 
-Enregistrer
+Ajouter un paiement.
 
-Rien d'autre.
 
----
+Informations :
 
-## 5. Historique
+- Montant
+- Mode paiement
+- Date
+
+
+Après paiement :
+
+Le reste à payer est recalculé automatiquement.
+
+
+Ne pas créer une gestion comptable complète.
+C'est uniquement un suivi de paiement de location MVP.
+
+--------------------------------------------------
+8. HISTORIQUE
+--------------------------------------------------
+
+Afficher toutes les locations.
 
 Filtres :
 
-Aujourd'hui
+- Aujourd'hui
+- Cette semaine
+- Ce mois
+- Cette année
 
-Cette semaine
 
-Ce mois
+==================================================
+RÈGLES TECHNIQUES
+==================================================
 
-Afficher :
+Avant toute modification :
 
-Date
+1. Lire entièrement :
+- sql/db.sql
+- structure backend
+- modèles
+- contrôleurs
+- vues frontend
 
-Montant
 
-Mode de paiement
+2. Faire une correspondance :
 
-Type
+Ancien module NAFA → Nouveau module Lokalex.
 
-(Vente ou Dépense)
 
-Possibilité de supprimer une opération.
+3. Adapter :
+- noms des tables ;
+- requêtes SQL ;
+- relations ;
+- modèles ;
+- contrôleurs ;
+- API ;
+- interfaces.
 
----
 
-## 6. Rapports
+Ne jamais créer une logique contraire à la base.
 
-Afficher :
+==================================================
+RÉSULTAT ATTENDU
+==================================================
 
-Total des ventes
+À la fin :
 
-Total des dépenses
+- L'application doit fonctionner de Lokalex.
+- Le vendeur doit pouvoir gérer son activité de location de A à Z.
+- L'interface doit rester simple telquelle.
+- Le code doit rester compatible avec une évolution future.
+- Aucun module inutile ne doit être ajouté.
 
-Résultat net
+Priorité :
+Simplicité MVP > complexité.
 
-Évolution par :
-
-Jour
-
-Semaine
-
-Mois
-
-Graphiques simples.
-
----
-
-## 7. Session de caisse
-
-À l'ouverture :
-
-Fond de caisse.
-
-À la fermeture :
-
-Résumé automatique :
-
-Ventes
-
-Dépenses
-
-Net
-
-Durée de la session.
-
----
-
-# UX
-
-L'application doit donner l'impression :
-
-"d'une calculatrice moderne."
-
-Très peu de clics.
-
-Très gros boutons.
-
-Police lisible.
-
-Peu de texte.
-
-Icônes simples.
-
----
-
-# Ce qui est interdit
-
-Ne jamais ajouter :
-
-Gestion de stock
-
-Produits
-
-Catégories
-
-Clients
-
-Fournisseurs
-
-Achats
-
-Factures
-
-Commandes
-
-CRM
-
-Comptabilité
-
-Multi-entrepôts
-
-Statistiques complexes
-
-ERP
-
-Modules inutiles
-
-Le projet doit rester volontairement minimaliste.
-
----
-
----
-
-# Expérience utilisateur
-
-L'utilisateur doit ouvrir NAFA et comprendre immédiatement son fonctionnement.
-
-Le temps d'apprentissage doit être inférieur à 30 secondes.
-
-L'objectif est qu'un commerçant qui utilise aujourd'hui une calculatrice préfère utiliser NAFA dès le premier jour.
-
-Chaque écran doit être pensé avec cette question :
-
-"Est-ce que cette fonctionnalité aide le commerçant à enregistrer une vente plus vite ?"
-
-Si la réponse est NON,
-
-alors cette fonctionnalité ne doit pas exister.
-
-NAFA doit devenir l'application la plus simple d'Afrique pour suivre ses ventes quotidiennes.
-
-
-attention soit fidel a la db.sql qui est dans le dossier sql c'est la bae de donne du projet n'ajour rien et fait seulement le cote front sans rien de dinamique et surtout mobile first comme une vrai app developpe en flutter avec btnNavBar et ou btn floating
+je rappel que db.sql est la base de donnee qui est exporte pour que tu voi la structure des tables
