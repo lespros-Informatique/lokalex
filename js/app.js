@@ -114,6 +114,11 @@ const app = {
             if (btn && dropdown && !btn.contains(e.target) && !dropdown.contains(e.target)) {
                 this.closeTopMenu();
             }
+            const navbarBtn = document.getElementById('navbar-menu-btn');
+            const navbarDropdown = document.getElementById('navbar-dropdown');
+            if (navbarBtn && navbarDropdown && !navbarBtn.contains(e.target) && !navbarDropdown.contains(e.target)) {
+                this.closeNavbarMenu();
+            }
         });
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -130,6 +135,23 @@ const app = {
         const target = document.getElementById('page-' + page);
         if (target) target.classList.add('active');
 
+        const titles = {
+            dashboard: 'Accueil',
+            articles: 'Articles',
+            clients: 'Clients',
+            categories: 'Catégories',
+            locations: 'Locations',
+            history: 'Historique',
+            reports: 'Rapports',
+            'nouvelle-location': 'Nouvelle location',
+            'dev-list': 'Utilisateurs',
+            'dev-shops': 'Boutiques',
+            'dev-forfaits': 'Forfaits',
+            'dev-abonnements': 'Abonnements'
+        };
+        const pageTitle = document.getElementById('page-title');
+        if (pageTitle && titles[page]) pageTitle.textContent = titles[page];
+
         if (page === 'login') {
             document.body.style.overflow = 'hidden';
         } else {
@@ -143,6 +165,16 @@ const app = {
         const fab = document.getElementById('fab-container');
         if (fab) fab.style.display = (loggedIn && ['dashboard', 'articles', 'clients', 'locations'].includes(page) && this.currentUser?.role_user !== 'developpeur') ? 'flex' : 'none';
         if (fab) fab.classList.remove('open');
+
+        const isPublicPage = page === 'login' || page === 'subscription' || page === 'download';
+        const sidebar = document.getElementById('sidebar');
+        const mainWrapper = document.getElementById('main-wrapper');
+        const navbar = document.getElementById('top-navbar');
+        const footer = document.getElementById('app-footer');
+        if (sidebar) sidebar.style.display = isPublicPage ? 'none' : '';
+        if (mainWrapper) mainWrapper.style.marginLeft = isPublicPage ? '0' : '';
+        if (navbar) navbar.style.display = isPublicPage ? 'none' : '';
+        if (footer) footer.style.display = isPublicPage ? 'none' : '';
 
         const isDev = this.currentUser && this.currentUser.role_user === 'developpeur';
         const menuBtn = document.getElementById('top-menu-btn');
@@ -1710,6 +1742,24 @@ const app = {
     closeTopMenu() {
         const dropdown = document.getElementById('top-menu-dropdown');
         if (dropdown) dropdown.classList.remove('open');
+        const navbarDropdown = document.getElementById('navbar-dropdown');
+        if (navbarDropdown) navbarDropdown.classList.remove('open');
+    },
+
+    closeNavbarMenu() {
+        const dropdown = document.getElementById('navbar-dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+    },
+
+    toggleNavbarMenu() {
+        const dropdown = document.getElementById('navbar-dropdown');
+        if (!dropdown) return;
+        const isOpen = dropdown.classList.contains('open');
+        if (isOpen) {
+            this.closeNavbarMenu();
+        } else {
+            dropdown.classList.add('open');
+        }
     },
 
     toggleTopMenu() {
@@ -1721,6 +1771,12 @@ const app = {
         } else {
             dropdown.classList.add('open');
         }
+    },
+
+    toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+        sidebar.classList.toggle('collapsed');
     },
 
     formatMoney(amount) {

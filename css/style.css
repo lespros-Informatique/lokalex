@@ -1555,3 +1555,7 @@ html, body {
 
 .client-picker { position: relative; }
 .client-picker .list-container { margin-top: 8px; max-height: 220px; overflow-y: auto; }
+
+.sidebar { display: none; }
+.top-navbar { display: none; }
+.app-footer { display: none; }
