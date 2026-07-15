@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NAFA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- TOAST -->
+        <div id="toast" class="toast"></div>
+
+        <!-- LOGIN PAGE -->
+        <div id="page-login" class="page active">
+            <div class="login-container">
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <img src="images/nafa-icon.svg" alt="NAFA" width="64" height="64">
+                    </div>
+                </div>
+                <form class="login-form" onsubmit="app.handleLogin(event)">
+                    <div class="input-group">
+                        <label for="phone">Numéro de téléphone</label>
+                        <input type="tel" id="phone" placeholder="+221 77 000 00 00" required inputmode="tel">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Continuer</button>
+                </form>
+                <p class="login-hint">Entrez votre numéro pour vous connecter</p>
+            </div>
+        </div>
+
+        <!-- SUBSCRIPTION PAGE -->
+        <div id="page-subscription" class="page">
+            <div class="header">
+                <h2>Accès NAFA</h2>
+                <p class="header-subtitle">Un abonnement est requis pour utiliser l'application</p>
+            </div>
+            <div class="list-container" id="subscription-content"></div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- DOWNLOAD PAGE -->
+        <div id="page-download" class="page">
+            <div class="header">
+                <h2>Télécharger NAFA</h2>
+                <p class="header-subtitle">Application mobile de gestion</p>
+            </div>
+            <div class="section">
+                <div class="download-hero">
+                    <div class="download-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </div>
+                    <h3 class="download-title">NAFA</h3>
+                    <p class="download-version">Version 2.1.1</p>
+                </div>
+                <div class="download-features">
+                    <div class="download-feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Gestion des ventes</span>
+                    </div>
+                    <div class="download-feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Suivi des dépenses</span>
+                    </div>
+                    <div class="download-feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Rapports et statistiques</span>
+                    </div>
+                    <div class="download-feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Gestion multi-boutiques</span>
+                    </div>
+                    <div class="download-feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Synchronisation en temps réel</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-full download-btn" onclick="app.downloadApk()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Télécharger l'application
+                </button>
+                <p class="download-note">Compatible Android 5.0 et plus</p>
+            </div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- DASHBOARD PAGE -->
+        <div id="page-dashboard" class="page">
+            <div class="header">
+                <h2 id="dash-greeting">Bonjour</h2>
+                <p class="header-subtitle" id="dash-date"></p>
+                <p class="header-user" id="dash-user-name"></p>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card metric-sales">
+                    <span class="metric-label">Ventes du jour</span>
+                    <span class="metric-value" id="dash-sales">0 F</span>
+                </div>
+                <div class="metric-card metric-expenses">
+                    <span class="metric-label">Dépenses du jour</span>
+                    <span class="metric-value" id="dash-expenses">0 F</span>
+                </div>
+                <div class="metric-card metric-net">
+                    <span class="metric-label">Net du jour</span>
+                    <span class="metric-value" id="dash-net">0 F</span>
+                </div>
+                <div class="metric-card metric-count">
+                    <span class="metric-label">Ventes</span>
+                    <span class="metric-value" id="dash-count">0</span>
+                </div>
+            </div>
+
+            <div class="section dev-only" id="dashboard-dev" style="display:none;">
+                <h3 class="section-title">Vue d'ensemble</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-label">Boutiques</span>
+                        <span class="metric-value" id="dev-boutiques">0</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Vendeurs</span>
+                        <span class="metric-value" id="dev-vendeurs">0</span>
+                    </div>
+                    <div class="metric-card metric-expenses metric-card-full">
+                        <span class="metric-label">Abonnements expirés</span>
+                        <span class="metric-value" id="dev-expires">0</span>
+                    </div>
+                </div>
+                <div class="dev-actions">
+                    <button class="btn btn-primary" onclick="app.navigate('dev-forfaits')">Forfaits</button>
+                    <button class="btn btn-primary" onclick="app.navigate('dev-abonnements')">Abonnements</button>
+                </div>
+            </div>
+
+            <div class="section" id="dashboard-recent">
+                <div class="list-container" id="recent-list"></div>
+                <button class="btn-search-trigger" onclick="app.openSearch()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Rechercher
+                </button>
+            </div>
+
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- NEW SALE PAGE -->
+        <div id="page-sale" class="page">
+            <div class="header">
+                <button class="btn-back" onclick="app.navigate('dashboard')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <h2>Nouvelle vente</h2>
+            </div>
+            <form class="form-page" onsubmit="app.handleSale(event)">
+                <div class="input-group">
+                    <label for="sale-amount">Montant</label>
+                    <input type="number" id="sale-amount" placeholder="0" required inputmode="decimal" step="1" min="0">
+                </div>
+                <button type="submit" class="btn btn-success btn-full">Enregistrer</button>
+            </form>
+        </div>
+
+        <!-- NEW EXPENSE PAGE -->
+        <div id="page-expense" class="page">
+            <div class="header">
+                <button class="btn-back" onclick="app.navigate('dashboard')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <h2>Nouvelle dépense</h2>
+            </div>
+            <form class="form-page" onsubmit="app.handleExpense(event)">
+                <div class="input-group">
+                    <label for="expense-label">Libellé</label>
+                    <input type="text" id="expense-label" placeholder="Ex: Achat marchandise" required>
+                </div>
+                <div class="input-group">
+                    <label for="expense-amount">Montant</label>
+                    <input type="number" id="expense-amount" placeholder="0" required inputmode="decimal" step="1" min="0">
+                </div>
+                <button type="submit" class="btn btn-danger btn-full">Enregistrer</button>
+            </form>
+        </div>
+
+        <!-- HISTORY PAGE -->
+        <div id="page-history" class="page">
+            <div class="header">
+                <h2>Historique</h2>
+                <p class="header-subtitle">Toutes vos opérations</p>
+            </div>
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="app.setHistoryFilter('today')" data-filter="today">Aujourd'hui</button>
+                <button class="filter-btn" onclick="app.setHistoryFilter('week')" data-filter="week">Semaine</button>
+                <button class="filter-btn" onclick="app.setHistoryFilter('month')" data-filter="month">Mois</button>
+            </div>
+            <div class="filter-bar" id="history-type-bar">
+                <button class="filter-btn active" onclick="app.setHistoryType('vente')" data-type="vente">Ventes</button>
+                <button class="filter-btn" onclick="app.setHistoryType('depense')" data-type="depense">Dépenses</button>
+            </div>
+            <div class="list-container" id="history-list"></div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- REPORTS PAGE -->
+        <div id="page-reports" class="page">
+            <div class="header">
+                <h2>Rapports</h2>
+                <p class="header-subtitle">Vue d'ensemble</p>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card metric-sales">
+                    <span class="metric-label">Total ventes</span>
+                    <span class="metric-value" id="report-sales">0 F</span>
+                </div>
+                <div class="metric-card metric-expenses">
+                    <span class="metric-label">Total dépenses</span>
+                    <span class="metric-value" id="report-expenses">0 F</span>
+                </div>
+                <div class="metric-card metric-net">
+                    <span class="metric-label">Résultat net</span>
+                    <span class="metric-value" id="report-net">0 F</span>
+                </div>
+            </div>
+            <div class="section">
+                <h3 class="section-title">Évolution</h3>
+                <div class="chart-tabs">
+                    <button class="chart-tab active" onclick="app.setReportPeriod('day')" data-period="day">Jour</button>
+                    <button class="chart-tab" onclick="app.setReportPeriod('week')" data-period="week">Semaine</button>
+                    <button class="chart-tab" onclick="app.setReportPeriod('month')" data-period="month">Mois</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="report-chart" height="220"></canvas>
+                    <div class="chart-legend">
+                        <div class="chart-legend-item">
+                            <span class="chart-legend-dot sales"></span>
+                            <span>Ventes</span>
+                        </div>
+                        <div class="chart-legend-item">
+                            <span class="chart-legend-dot expenses"></span>
+                            <span>Dépenses</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- DEV: USERS LIST -->
+        <div id="page-dev-list" class="page">
+            <div class="header">
+                <div class="header-row">
+                    <div>
+                        <h2>Utilisateurs</h2>
+                        <p class="header-subtitle">Tous les comptes</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="app.openCreateUserModal()">Nouveau</button>
+                </div>
+            </div>
+            <div class="dev-search-bar">
+                <input type="text" class="dev-search-input" id="dev-user-search" placeholder="Rechercher un utilisateur..." oninput="app.onDevUserSearch(this.value)">
+            </div>
+            <div class="list-container" id="dev-user-list"></div>
+            <button class="btn-load-more" id="dev-user-load-more" style="display:none;" onclick="app.loadMoreDevUsers()">Charger plus</button>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- DEV: BOUTIQUES LIST -->
+        <div id="page-dev-shops" class="page">
+            <div class="header">
+                <h2>Boutiques</h2>
+                <p class="header-subtitle">Toutes les boutiques</p>
+            </div>
+            <div class="dev-search-bar">
+                <input type="text" class="dev-search-input" id="dev-shop-search" placeholder="Rechercher une boutique..." oninput="app.onDevShopSearch(this.value)">
+            </div>
+            <div class="list-container" id="dev-shop-list"></div>
+            <button class="btn-load-more" id="dev-shop-load-more" style="display:none;" onclick="app.loadMoreDevShops()">Charger plus</button>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- DEV: FORFAITS LIST -->
+        <div id="page-dev-forfaits" class="page">
+            <div class="header">
+                <div class="header-row">
+                    <div>
+                        <h2>Forfaits</h2>
+                        <p class="header-subtitle">Plans d'abonnement</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="app.openCreateForfaitModal()">Nouveau</button>
+                </div>
+            </div>
+            <div class="list-container" id="dev-forfait-list"></div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- DEV: ABONNEMENTS LIST -->
+        <div id="page-dev-abonnements" class="page">
+            <div class="header">
+                <h2>Abonnements</h2>
+                <p class="header-subtitle">Tous les abonnements</p>
+            </div>
+            <div class="list-container" id="dev-abonnement-list"></div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- CREATE FORFAIT MODAL -->
+        <div id="create-forfait-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateForfaitModal()">
+            <div class="modal-sheet">
+                <div class="modal-header">
+                    <h3>Nouveau forfait</h3>
+                    <button class="modal-close" onclick="app.closeCreateForfaitModal()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <form class="form-page" onsubmit="app.handleCreateForfait(event)">
+                    <div class="input-group">
+                        <label for="dev-forfait-libelle">Libellé</label>
+                        <input type="text" id="dev-forfait-libelle" placeholder="Ex: Standard" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="dev-forfait-prix">Prix (F)</label>
+                        <input type="number" id="dev-forfait-prix" placeholder="0" required inputmode="decimal" min="0" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="dev-forfait-duree">Durée (jours)</label>
+                        <input type="number" id="dev-forfait-duree" placeholder="365" required inputmode="numeric" min="1" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="dev-forfait-description">Description</label>
+                        <input type="text" id="dev-forfait-description" placeholder="Optionnel">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Créer le forfait</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- FLOATING ACTION BUTTON -->
+        <div id="fab-container" class="fab-container" style="display:none;">
+            <button class="fab" onclick="app.navigate('sale')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <div class="fab-menu" id="fab-menu">
+                <button class="fab-menu-item" onclick="app.navigate('sale')">
+                    <span class="fab-menu-dot" style="background:#16A34A"></span>Vente
+                </button>
+                <button class="fab-menu-item" onclick="app.navigate('expense')">
+                    <span class="fab-menu-dot" style="background:#166534"></span>Dépense
+                </button>
+            </div>
+        </div>
+
+        <!-- SEARCH MODAL -->
+        <div id="search-modal" class="modal-overlay" onclick="if(event.target===this)app.closeSearch()">
+            <div class="modal-sheet">
+                <div class="modal-header">
+                    <h3>Rechercher</h3>
+                    <button class="modal-close" onclick="app.closeSearch()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="search-input" placeholder="Rechercher une vente..." oninput="app.performSearch(this.value)">
+                </div>
+                <div class="list-container" id="search-results"></div>
+            </div>
+        </div>
+
+        <!-- USER DETAIL MODAL -->
+        <div id="user-detail-modal" class="modal-overlay" onclick="if(event.target===this)app.closeUserDetail()">
+            <div class="modal-sheet">
+                <div id="user-detail-sheet"></div>
+            </div>
+        </div>
+
+        <!-- CREATE USER MODAL -->
+        <div id="create-user-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateUserModal()">
+            <div class="modal-sheet">
+                <div class="modal-header">
+                    <h3>Nouvel utilisateur</h3>
+                    <button class="modal-close" onclick="app.closeCreateUserModal()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <form class="form-page" onsubmit="app.handleCreateUser(event)">
+                    <div class="input-group">
+                        <label for="dev-user-phone">Téléphone</label>
+                        <input type="tel" id="dev-user-phone" placeholder="+221 77 000 00 00" required inputmode="tel">
+                    </div>
+                    <div class="input-group">
+                        <label for="dev-user-name">Nom</label>
+                        <input type="text" id="dev-user-name" placeholder="Nom complet" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="dev-user-role">Rôle</label>
+                        <select id="dev-user-role">
+                            <option value="vendeur">Vendeur</option>
+                            <option value="developpeur">Développeur</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Créer l'utilisateur</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CREATE SHOP MODAL -->
+        <div id="create-shop-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateShopModal()">
+            <div class="modal-sheet">
+                <div class="modal-header">
+                    <h3>Nouvelle boutique</h3>
+                    <button class="modal-close" onclick="app.closeCreateShopModal()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <form class="form-page" onsubmit="app.handleCreateShop(event)">
+                    <div class="input-group">
+                        <label for="dev-shop-user-code">Code utilisateur</label>
+                        <input type="text" id="dev-shop-user-code" placeholder="Ex: USR1783964958" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="dev-shop-label">Libellé boutique</label>
+                        <input type="text" id="dev-shop-label" placeholder="Ex: Boutique centre" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="dev-shop-forfait">Forfait (essai)</label>
+                        <select id="dev-shop-forfait" required></select>
+                    </div>
+                    <div class="input-group">
+                        <label for="dev-shop-currency">Devise</label>
+                        <input type="text" id="dev-shop-currency" value="F">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Créer la boutique</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav id="bottom-nav" class="bottom-nav" style="display:none;">
+            <button class="nav-item active" onclick="app.navigate('dashboard')" data-page="dashboard">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Accueil</span>
+            </button>
+            <button class="nav-item" onclick="app.navigate('history')" data-page="history">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span>Historique</span>
+            </button>
+            <button class="nav-item" onclick="app.navigate('reports')" data-page="reports">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                <span>Rapports</span>
+            </button>
+            <button class="nav-item dev-only" style="display:none;" onclick="app.navigate('dev-shops')" data-page="dev-shops">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Boutiques</span>
+            </button>
+            <button class="nav-item dev-only" style="display:none;" onclick="app.navigate('dev-list')" data-page="dev-list">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                <span>User</span>
+            </button>
+        </nav>
+
+        <button id="logout-top" class="logout-top" onclick="app.logout()" style="display:none;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+        <button id="download-top" class="download-top" onclick="app.navigate('download')" style="display:none;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </button>
+
+        <!-- CONFIRM MODAL -->
+        <div id="confirm-modal" class="modal-overlay" onclick="if(event.target===this)app.closeConfirm()">
+            <div class="modal-sheet confirm-sheet">
+                <div class="confirm-body">
+                    <div class="confirm-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </div>
+                    <h3 class="confirm-title">Supprimer cette opération ?</h3>
+                    <p class="confirm-message">Cette action est irréversible.</p>
+                </div>
+                <div class="confirm-actions">
+                    <button class="btn btn-secondary" onclick="app.closeConfirm()">Annuler</button>
+                    <button class="btn btn-danger" onclick="app.confirmDelete()">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>
