@@ -13,65 +13,36 @@ class HistoryController extends Controller
         $clientDate = $_GET['client_date'] ?? null;
 
         if ($isDev) {
-            $sales = Sale::getAll();
-            $expenses = Expense::getAll();
+            $locations = Location::all();
         } else {
             $shop = Shop::findByUserCode($user['code_user']);
             if (!$shop) {
                 Response::error('Boutique introuvable', [], 404);
             }
-            $sales = Sale::getAllByShop($shop['code_boutique']);
-            $expenses = Expense::getAllByShop($shop['code_boutique']);
+            $locations = Location::allByBoutique($shop['code_boutique']);
         }
 
         $items = [];
-        foreach ($sales as $sale) {
-            $date = new DateTime($sale['created_at_vente']);
+        foreach ($locations as $loc) {
+            $date = new DateTime($loc['created_at_location']);
             if ($this->matchFilter($date, $filter, $clientDate)) {
                 $items[] = [
-                    'type' => 'vente',
-                    'id' => $sale['code_vente'],
-                    'title' => 'Vente',
+                    'type' => 'location',
+                    'id' => $loc['code_location'],
+                    'title' => $loc['nom_client'] ?? 'Client',
                     'meta' => $date->format('d/m/Y H:i'),
-                    'amount' => (float) $sale['montant_vente'],
-                    'mode' => $sale['mode_paiement_vente'],
-                ];
-            }
-        }
-        foreach ($expenses as $expense) {
-            $date = new DateTime($expense['date_depense_depense']);
-            if ($this->matchFilter($date, $filter, $clientDate)) {
-                $items[] = [
-                    'type' => 'depense',
-                    'id' => $expense['code_depense'],
-                    'title' => $expense['libelle_depense'],
-                    'meta' => $date->format('d/m/Y H:i'),
-                    'amount' => (float) $expense['montant_depense'],
-                    'mode' => '-',
+                    'amount' => (float) $loc['montant_location'],
+                    'reste' => (float) $loc['reste_location'],
+                    'statut' => $loc['statut_location'],
                 ];
             }
         }
 
-        usort($items, function ($a, $b) { return strtotime($b['meta']) - strtotime($a['meta']); });
+        usort($items, function ($a, $b) {
+            return strtotime($b['meta']) - strtotime($a['meta']);
+        });
 
         Response::success('Historique', ['items' => $items]);
-    }
-
-    public function delete(): void
-    {
-        $user = $this->requireActiveSubscription();
-        $type = $this->input('type', '');
-        $id = $this->input('id', '');
-
-        if ($type === 'vente') {
-            Sale::delete($id);
-        } elseif ($type === 'depense') {
-            Expense::delete($id);
-        } else {
-            Response::error('Type invalide', [], 400);
-        }
-
-        Response::success('Opération supprimée');
     }
 
     private function matchFilter(DateTime $date, string $filter, $clientDate = null): bool
@@ -85,6 +56,9 @@ class HistoryController extends Controller
         } elseif ($filter === 'month') {
             $monthAgo = (clone $now)->modify('-1 month');
             return $date >= $monthAgo;
+        } elseif ($filter === 'year') {
+            $yearAgo = (clone $now)->modify('-1 year');
+            return $date >= $yearAgo;
         }
         return true;
     }

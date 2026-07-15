@@ -17,7 +17,7 @@
 
 return [
     'host' => '127.0.0.1',
-    'dbname' => 'db_nafa',
+    'dbname' => 'db_location',
     'username' => 'root',
     'password' => '',
     'charset' => 'utf8mb4',

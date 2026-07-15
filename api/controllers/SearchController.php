@@ -17,16 +17,17 @@ class SearchController extends Controller
             Response::success('Résultats de recherche', ['results' => []]);
         }
 
-        $results = Sale::search($shop['code_boutique'], $query);
-        $formatted = array_map(function ($sale) {
-            $date = new DateTime($sale['created_at_vente']);
+        $results = Location::allByBoutique($shop['code_boutique'], $query);
+        $formatted = array_map(function ($loc) {
+            $date = new DateTime($loc['created_at_location']);
             return [
-                'type' => 'vente',
-                'id' => $sale['code_vente'],
-                'title' => 'Vente',
+                'type' => 'location',
+                'id' => $loc['code_location'],
+                'title' => $loc['nom_client'] ?? 'Client',
                 'meta' => $date->format('d/m/Y H:i'),
-                'amount' => (float) $sale['montant_vente'],
-                'mode' => $sale['mode_paiement_vente'],
+                'amount' => (float) $loc['montant_location'],
+                'reste' => (float) $loc['reste_location'],
+                'statut' => $loc['statut_location'],
             ];
         }, $results);
 

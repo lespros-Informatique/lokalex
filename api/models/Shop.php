@@ -34,14 +34,13 @@ class Shop
     {
         $codeBoutique = 'BTE' . time() . mt_rand(100, 999);
         $stmt = Database::getConnection()->prepare(
-            'INSERT INTO boutiques (code_boutique, user_code, libelle_boutique, devise_boutique, statut_boutique, created_at_boutique)
-             VALUES (:code_boutique, :user_code, :libelle_boutique, :devise_boutique, :statut_boutique, :created_at_boutique)'
+            'INSERT INTO boutiques (code_boutique, user_code, libelle_boutique, statut_boutique, created_at_boutique)
+             VALUES (:code_boutique, :user_code, :libelle_boutique, :statut_boutique, :created_at_boutique)'
         );
         $stmt->execute([
             'code_boutique' => $codeBoutique,
             'user_code' => $userCode,
             'libelle_boutique' => 'Ma boutique',
-            'devise_boutique' => 'F',
             'statut_boutique' => 'actif',
             'created_at_boutique' => date('Y-m-d H:i:s'),
         ]);

@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NAFA</title>
+    <title>LOKALEX</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="icon" type="image/png" href="images/lokalex-icon.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="app">
-        <!-- TOAST -->
         <div id="toast" class="toast"></div>
 
         <!-- LOGIN PAGE -->
@@ -20,7 +19,7 @@
             <div class="login-container">
                 <div class="logo-section">
                     <div class="logo-icon">
-                        <img src="images/nafa-icon.svg" alt="NAFA" width="64" height="64">
+                        <img src="images/lokalex-icon.png" alt="LOKALEX" width="64" height="64">
                     </div>
                 </div>
                 <form class="login-form" onsubmit="app.handleLogin(event)">
@@ -37,7 +36,7 @@
         <!-- SUBSCRIPTION PAGE -->
         <div id="page-subscription" class="page">
             <div class="header">
-                <h2>Accès NAFA</h2>
+                <h2>Accès LOKALEX</h2>
                 <p class="header-subtitle">Un abonnement est requis pour utiliser l'application</p>
             </div>
             <div class="list-container" id="subscription-content"></div>
@@ -47,44 +46,8 @@
         <!-- DOWNLOAD PAGE -->
         <div id="page-download" class="page">
             <div class="header">
-                <h2>Télécharger NAFA</h2>
-                <p class="header-subtitle">Application mobile de gestion</p>
-            </div>
-            <div class="section">
-                <div class="download-hero">
-                    <div class="download-icon">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    </div>
-                    <h3 class="download-title">NAFA</h3>
-                    <p class="download-version">Version 2.1.1</p>
-                </div>
-                <div class="download-features">
-                    <div class="download-feature">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Gestion des ventes</span>
-                    </div>
-                    <div class="download-feature">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Suivi des dépenses</span>
-                    </div>
-                    <div class="download-feature">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Rapports et statistiques</span>
-                    </div>
-                    <div class="download-feature">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Gestion multi-boutiques</span>
-                    </div>
-                    <div class="download-feature">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Synchronisation en temps réel</span>
-                    </div>
-                </div>
-                <button class="btn btn-primary btn-full download-btn" onclick="app.downloadApk()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Télécharger l'application
-                </button>
-                <p class="download-note">Compatible Android 5.0 et plus</p>
+                <h2>Télécharger LOKALEX</h2>
+                <p class="header-subtitle">Application mobile de gestion de location</p>
             </div>
             <div class="bottom-spacer"></div>
         </div>
@@ -96,111 +59,156 @@
                 <p class="header-subtitle" id="dash-date"></p>
                 <p class="header-user" id="dash-user-name"></p>
             </div>
-
             <div class="metrics-grid">
-                <div class="metric-card metric-sales">
-                    <span class="metric-label">Ventes du jour</span>
-                    <span class="metric-value" id="dash-sales">0 F</span>
-                </div>
-                <div class="metric-card metric-expenses">
-                    <span class="metric-label">Dépenses du jour</span>
-                    <span class="metric-value" id="dash-expenses">0 F</span>
-                </div>
-                <div class="metric-card metric-net">
-                    <span class="metric-label">Net du jour</span>
-                    <span class="metric-value" id="dash-net">0 F</span>
-                </div>
-                <div class="metric-card metric-count">
-                    <span class="metric-label">Ventes</span>
-                    <span class="metric-value" id="dash-count">0</span>
-                </div>
+                <div class="metric-card"><span class="metric-label">📦 En cours</span><span class="metric-value" id="dash-en-cours">0</span></div>
+                <div class="metric-card"><span class="metric-label">📅 Retours prévus</span><span class="metric-value" id="dash-retours">0</span></div>
+                <div class="metric-card"><span class="metric-label">💰 Montant du jour</span><span class="metric-value" id="dash-montant">0 F</span></div>
+                <div class="metric-card"><span class="metric-label">👥 Clients</span><span class="metric-value" id="dash-clients">0</span></div>
+                <div class="metric-card metric-expenses metric-card-full"><span class="metric-label">⚠️ En retard</span><span class="metric-value" id="dash-retards">0</span></div>
             </div>
-
             <div class="section dev-only" id="dashboard-dev" style="display:none;">
                 <h3 class="section-title">Vue d'ensemble</h3>
                 <div class="metrics-grid">
-                    <div class="metric-card">
-                        <span class="metric-label">Boutiques</span>
-                        <span class="metric-value" id="dev-boutiques">0</span>
-                    </div>
-                    <div class="metric-card">
-                        <span class="metric-label">Vendeurs</span>
-                        <span class="metric-value" id="dev-vendeurs">0</span>
-                    </div>
-                    <div class="metric-card metric-expenses metric-card-full">
-                        <span class="metric-label">Abonnements expirés</span>
-                        <span class="metric-value" id="dev-expires">0</span>
-                    </div>
+                    <div class="metric-card"><span class="metric-label">Boutiques</span><span class="metric-value" id="dev-boutiques">0</span></div>
+                    <div class="metric-card"><span class="metric-label">Vendeurs</span><span class="metric-value" id="dev-vendeurs">0</span></div>
+                    <div class="metric-card metric-expenses metric-card-full"><span class="metric-label">Abonnements expirés</span><span class="metric-value" id="dev-expires">0</span></div>
                 </div>
                 <div class="dev-actions">
                     <button class="btn btn-primary" onclick="app.navigate('dev-forfaits')">Forfaits</button>
                     <button class="btn btn-primary" onclick="app.navigate('dev-abonnements')">Abonnements</button>
                 </div>
             </div>
-
             <div class="section" id="dashboard-recent">
+                <h3 class="section-title">Dernières locations</h3>
                 <div class="list-container" id="recent-list"></div>
                 <button class="btn-search-trigger" onclick="app.openSearch()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     Rechercher
                 </button>
             </div>
-
             <div class="bottom-spacer"></div>
         </div>
 
-        <!-- NEW SALE PAGE -->
-        <div id="page-sale" class="page">
+        <!-- ARTICLES PAGE -->
+        <div id="page-articles" class="page">
+            <div class="header">
+                <div class="header-row">
+                    <div>
+                        <h2>Articles</h2>
+                        <p class="header-subtitle">Matériel disponible</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="app.openCreateArticleModal()">Nouveau</button>
+                </div>
+            </div>
+            <div class="list-container" id="article-list"></div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- CLIENTS PAGE -->
+        <div id="page-clients" class="page">
+            <div class="header">
+                <div class="header-row">
+                    <div>
+                        <h2>Clients</h2>
+                        <p class="header-subtitle">Vos clients</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="app.openCreateClientModal()">Nouveau</button>
+                </div>
+            </div>
+            <div class="dev-search-bar">
+                <input type="text" class="dev-search-input" id="client-search" placeholder="Rechercher un client..." oninput="app.onClientSearch(this.value)">
+            </div>
+            <div class="list-container" id="client-list"></div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- CATEGORIES PAGE -->
+        <div id="page-categories" class="page">
+            <div class="header">
+                <div class="header-row">
+                    <div>
+                        <h2>Catégories</h2>
+                        <p class="header-subtitle">Catégories d'articles</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="app.openCreateCategorieModal()">Nouveau</button>
+                </div>
+            </div>
+            <div class="list-container" id="categorie-list"></div>
+            <div class="bottom-spacer"></div>
+        </div>
+
+        <!-- NOUVELLE LOCATION PAGE -->
+        <div id="page-nouvelle-location" class="page">
             <div class="header">
                 <button class="btn-back" onclick="app.navigate('dashboard')">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 </button>
-                <h2>Nouvelle vente</h2>
+                <h2>Nouvelle location</h2>
             </div>
-            <form class="form-page" onsubmit="app.handleSale(event)">
+            <form class="form-page" onsubmit="app.handleLocation(event)">
                 <div class="input-group">
-                    <label for="sale-amount">Montant</label>
-                    <input type="number" id="sale-amount" placeholder="0" required inputmode="decimal" step="1" min="0">
+                    <label>Client</label>
+                    <input type="text" id="location-client-search" placeholder="Rechercher un client..." oninput="app.onLocationClientSearch(this.value)">
+                    <div class="list-container" id="location-client-results"></div>
+                    <input type="hidden" id="location-client-code">
+                    <div id="location-client-selected" class="selected-chip" style="display:none;"></div>
+                    <button type="button" class="btn btn-secondary btn-full" onclick="app.openCreateClientModal('location')">+ Créer un client</button>
                 </div>
-                <button type="submit" class="btn btn-success btn-full">Enregistrer</button>
+                <div class="input-group">
+                    <label>Lignes de location</label>
+                    <div id="location-lignes"></div>
+                    <button type="button" class="btn btn-secondary btn-full" onclick="app.addLocationLigne()">+ Ajouter un article</button>
+                </div>
+                <div class="input-group">
+                    <label for="location-date-sortie">Date de sortie</label>
+                    <input type="date" id="location-date-sortie" required>
+                </div>
+                <div class="input-group">
+                    <label for="location-date-retour">Date de retour prévue</label>
+                    <input type="date" id="location-date-retour" required>
+                </div>
+                <div class="input-group">
+                    <label for="location-avance">Avance</label>
+                    <input type="number" id="location-avance" placeholder="0" inputmode="decimal" min="0" step="1" oninput="app.calcLocationReste()">
+                </div>
+                <div class="input-group">
+                    <label>Reste à payer</label>
+                    <div class="readonly-amount" id="location-reste">0 F</div>
+                </div>
+                <button type="submit" class="btn btn-success btn-full">Enregistrer la location</button>
             </form>
         </div>
 
-        <!-- NEW EXPENSE PAGE -->
-        <div id="page-expense" class="page">
+        <!-- LOCATIONS PAGE -->
+        <div id="page-locations" class="page">
             <div class="header">
-                <button class="btn-back" onclick="app.navigate('dashboard')">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                </button>
-                <h2>Nouvelle dépense</h2>
+                <h2>Locations</h2>
+                <p class="header-subtitle">Toutes vos locations</p>
             </div>
-            <form class="form-page" onsubmit="app.handleExpense(event)">
-                <div class="input-group">
-                    <label for="expense-label">Libellé</label>
-                    <input type="text" id="expense-label" placeholder="Ex: Achat marchandise" required>
-                </div>
-                <div class="input-group">
-                    <label for="expense-amount">Montant</label>
-                    <input type="number" id="expense-amount" placeholder="0" required inputmode="decimal" step="1" min="0">
-                </div>
-                <button type="submit" class="btn btn-danger btn-full">Enregistrer</button>
-            </form>
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="app.setLocationFilter('')" data-loc-filter="">Toutes</button>
+                <button class="filter-btn" onclick="app.setLocationFilter('en_cours')" data-loc-filter="en_cours">🟢 En cours</button>
+                <button class="filter-btn" onclick="app.setLocationFilter('terminee')" data-loc-filter="terminee">🔵 Terminée</button>
+                <button class="filter-btn" onclick="app.setLocationFilter('retard')" data-loc-filter="retard">🔴 En retard</button>
+            </div>
+            <div class="dev-search-bar">
+                <input type="text" class="dev-search-input" id="location-search" placeholder="Nom, téléphone..." oninput="app.onLocationSearch(this.value)">
+            </div>
+            <div class="list-container" id="location-list"></div>
+            <div class="bottom-spacer"></div>
         </div>
 
         <!-- HISTORY PAGE -->
         <div id="page-history" class="page">
             <div class="header">
                 <h2>Historique</h2>
-                <p class="header-subtitle">Toutes vos opérations</p>
+                <p class="header-subtitle">Toutes vos locations</p>
             </div>
             <div class="filter-bar">
                 <button class="filter-btn active" onclick="app.setHistoryFilter('today')" data-filter="today">Aujourd'hui</button>
                 <button class="filter-btn" onclick="app.setHistoryFilter('week')" data-filter="week">Semaine</button>
                 <button class="filter-btn" onclick="app.setHistoryFilter('month')" data-filter="month">Mois</button>
-            </div>
-            <div class="filter-bar" id="history-type-bar">
-                <button class="filter-btn active" onclick="app.setHistoryType('vente')" data-type="vente">Ventes</button>
-                <button class="filter-btn" onclick="app.setHistoryType('depense')" data-type="depense">Dépenses</button>
+                <button class="filter-btn" onclick="app.setHistoryFilter('year')" data-filter="year">Année</button>
             </div>
             <div class="list-container" id="history-list"></div>
             <div class="bottom-spacer"></div>
@@ -213,18 +221,9 @@
                 <p class="header-subtitle">Vue d'ensemble</p>
             </div>
             <div class="metrics-grid">
-                <div class="metric-card metric-sales">
-                    <span class="metric-label">Total ventes</span>
-                    <span class="metric-value" id="report-sales">0 F</span>
-                </div>
-                <div class="metric-card metric-expenses">
-                    <span class="metric-label">Total dépenses</span>
-                    <span class="metric-value" id="report-expenses">0 F</span>
-                </div>
-                <div class="metric-card metric-net">
-                    <span class="metric-label">Résultat net</span>
-                    <span class="metric-value" id="report-net">0 F</span>
-                </div>
+                <div class="metric-card metric-sales"><span class="metric-label">Montant total</span><span class="metric-value" id="report-sales">0 F</span></div>
+                <div class="metric-card metric-expenses"><span class="metric-label">Encaissé</span><span class="metric-value" id="report-expenses">0 F</span></div>
+                <div class="metric-card metric-net"><span class="metric-label">Reste à payer</span><span class="metric-value" id="report-net">0 F</span></div>
             </div>
             <div class="section">
                 <h3 class="section-title">Évolution</h3>
@@ -236,14 +235,8 @@
                 <div class="chart-container">
                     <canvas id="report-chart" height="220"></canvas>
                     <div class="chart-legend">
-                        <div class="chart-legend-item">
-                            <span class="chart-legend-dot sales"></span>
-                            <span>Ventes</span>
-                        </div>
-                        <div class="chart-legend-item">
-                            <span class="chart-legend-dot expenses"></span>
-                            <span>Dépenses</span>
-                        </div>
+                        <div class="chart-legend-item"><span class="chart-legend-dot sales"></span><span>Montant</span></div>
+                        <div class="chart-legend-item"><span class="chart-legend-dot expenses"></span><span>Encaissé</span></div>
                     </div>
                 </div>
             </div>
@@ -254,10 +247,7 @@
         <div id="page-dev-list" class="page">
             <div class="header">
                 <div class="header-row">
-                    <div>
-                        <h2>Utilisateurs</h2>
-                        <p class="header-subtitle">Tous les comptes</p>
-                    </div>
+                    <div><h2>Utilisateurs</h2><p class="header-subtitle">Tous les comptes</p></div>
                     <button class="btn btn-primary" onclick="app.openCreateUserModal()">Nouveau</button>
                 </div>
             </div>
@@ -287,10 +277,7 @@
         <div id="page-dev-forfaits" class="page">
             <div class="header">
                 <div class="header-row">
-                    <div>
-                        <h2>Forfaits</h2>
-                        <p class="header-subtitle">Plans d'abonnement</p>
-                    </div>
+                    <div><h2>Forfaits</h2><p class="header-subtitle">Plans d'abonnement</p></div>
                     <button class="btn btn-primary" onclick="app.openCreateForfaitModal()">Nouveau</button>
                 </div>
             </div>
@@ -308,99 +295,132 @@
             <div class="bottom-spacer"></div>
         </div>
 
-        <!-- CREATE FORFAIT MODAL -->
-        <div id="create-forfait-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateForfaitModal()">
+        <!-- CREATE ARTICLE MODAL -->
+        <div id="create-article-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateArticleModal()">
             <div class="modal-sheet">
                 <div class="modal-header">
-                    <h3>Nouveau forfait</h3>
-                    <button class="modal-close" onclick="app.closeCreateForfaitModal()">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
+                    <h3 id="article-modal-title">Nouvel article</h3>
+                    <button class="modal-close" onclick="app.closeCreateArticleModal()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                 </div>
-                <form class="form-page" onsubmit="app.handleCreateForfait(event)">
-                    <div class="input-group">
-                        <label for="dev-forfait-libelle">Libellé</label>
-                        <input type="text" id="dev-forfait-libelle" placeholder="Ex: Standard" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="dev-forfait-prix">Prix (F)</label>
-                        <input type="number" id="dev-forfait-prix" placeholder="0" required inputmode="decimal" min="0" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label for="dev-forfait-duree">Durée (jours)</label>
-                        <input type="number" id="dev-forfait-duree" placeholder="365" required inputmode="numeric" min="1" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label for="dev-forfait-description">Description</label>
-                        <input type="text" id="dev-forfait-description" placeholder="Optionnel">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full">Créer le forfait</button>
+                <form class="form-page" onsubmit="app.handleCreateArticle(event)">
+                    <input type="hidden" id="article-code">
+                    <div class="input-group"><label for="article-libelle">Nom</label><input type="text" id="article-libelle" placeholder="Ex: Chaise plastique" required></div>
+                    <div class="input-group"><label for="article-categorie">Catégorie</label><select id="article-categorie"></select></div>
+                    <div class="input-group"><label for="article-quantite">Quantité disponible</label><input type="number" id="article-quantite" placeholder="0" min="0" step="1" required></div>
+                    <div class="input-group"><label for="article-prix">Prix de location</label><input type="number" id="article-prix" placeholder="0" min="0" step="1"></div>
+                    <button type="submit" class="btn btn-primary btn-full" id="article-submit">Ajouter</button>
                 </form>
             </div>
         </div>
 
-        <!-- FLOATING ACTION BUTTON -->
-        <div id="fab-container" class="fab-container" style="display:none;">
-            <button class="fab" onclick="app.navigate('sale')">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </button>
-            <div class="fab-menu" id="fab-menu">
-                <button class="fab-menu-item" onclick="app.navigate('sale')">
-                    <span class="fab-menu-dot" style="background:#16A34A"></span>Vente
-                </button>
-                <button class="fab-menu-item" onclick="app.navigate('expense')">
-                    <span class="fab-menu-dot" style="background:#166534"></span>Dépense
-                </button>
+        <!-- CREATE CATEGORIE MODAL -->
+        <div id="create-categorie-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateCategorieModal()">
+            <div class="modal-sheet">
+                <div class="modal-header"><h3>Nouvelle catégorie</h3><button class="modal-close" onclick="app.closeCreateCategorieModal()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+                <form class="form-page" onsubmit="app.handleCreateCategorie(event)">
+                    <div class="input-group"><label for="categorie-libelle">Libellé</label><input type="text" id="categorie-libelle" placeholder="Ex: Mobilier" required></div>
+                    <button type="submit" class="btn btn-primary btn-full">Créer</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CREATE CLIENT MODAL -->
+        <div id="create-client-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateClientModal()">
+            <div class="modal-sheet">
+                <div class="modal-header"><h3>Nouveau client</h3><button class="modal-close" onclick="app.closeCreateClientModal()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+                <form class="form-page" onsubmit="app.handleCreateClient(event)">
+                    <input type="hidden" id="client-context">
+                    <div class="input-group"><label for="client-nom">Nom</label><input type="text" id="client-nom" placeholder="Nom complet" required></div>
+                    <div class="input-group"><label for="client-telephone">Téléphone</label><input type="tel" id="client-telephone" placeholder="+221..."></div>
+                    <div class="input-group"><label for="client-adresse">Adresse</label><input type="text" id="client-adresse" placeholder="Optionnel"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Créer le client</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- LOCATION DETAIL MODAL -->
+        <div id="location-detail-modal" class="modal-overlay" onclick="if(event.target===this)app.closeLocationDetail()">
+            <div class="modal-sheet"><div id="location-detail-sheet"></div></div>
+        </div>
+
+        <!-- RETOUR MODAL -->
+        <div id="retour-modal" class="modal-overlay" onclick="if(event.target===this)app.closeRetour()">
+            <div class="modal-sheet">
+                <div class="modal-header"><h3>Retour matériel</h3><button class="modal-close" onclick="app.closeRetour()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+                <form class="form-page" onsubmit="app.handleRetour(event)">
+                    <input type="hidden" id="retour-code">
+                    <div id="retour-lignes"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Valider le retour</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAIEMENT MODAL -->
+        <div id="paiement-modal" class="modal-overlay" onclick="if(event.target===this)app.closePaiement()">
+            <div class="modal-sheet">
+                <div class="modal-header"><h3>Ajouter un paiement</h3><button class="modal-close" onclick="app.closePaiement()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+                <form class="form-page" onsubmit="app.handlePaiement(event)">
+                    <input type="hidden" id="paiement-code">
+                    <div class="input-group"><label for="paiement-montant">Montant</label><input type="number" id="paiement-montant" placeholder="0" min="0" step="1" required></div>
+                    <div class="input-group"><label for="paiement-mode">Mode de paiement</label>
+                        <select id="paiement-mode">
+                            <option value="especes">Espèces</option>
+                            <option value="wave">Wave</option>
+                            <option value="orange">Orange Money</option>
+                            <option value="mtn">MTN</option>
+                            <option value="moov">Moov</option>
+                            <option value="carte">Carte</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="input-group"><label for="paiement-reference">Référence</label><input type="text" id="paiement-reference" placeholder="Optionnel"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CLIENT DETAIL MODAL -->
+        <div id="client-detail-modal" class="modal-overlay" onclick="if(event.target===this)app.closeClientDetail()">
+            <div class="modal-sheet"><div id="client-detail-sheet"></div></div>
+        </div>
+
+        <!-- CREATE FORFAIT MODAL -->
+        <div id="create-forfait-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateForfaitModal()">
+            <div class="modal-sheet">
+                <div class="modal-header"><h3>Nouveau forfait</h3><button class="modal-close" onclick="app.closeCreateForfaitModal()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+                <form class="form-page" onsubmit="app.handleCreateForfait(event)">
+                    <div class="input-group"><label for="dev-forfait-libelle">Libellé</label><input type="text" id="dev-forfait-libelle" placeholder="Ex: Standard" required></div>
+                    <div class="input-group"><label for="dev-forfait-prix">Prix (F)</label><input type="number" id="dev-forfait-prix" placeholder="0" required inputmode="decimal" min="0" step="1"></div>
+                    <div class="input-group"><label for="dev-forfait-duree">Durée (jours)</label><input type="number" id="dev-forfait-duree" placeholder="365" required inputmode="numeric" min="1" step="1"></div>
+                    <div class="input-group"><label for="dev-forfait-description">Description</label><input type="text" id="dev-forfait-description" placeholder="Optionnel"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Créer le forfait</button>
+                </form>
             </div>
         </div>
 
         <!-- SEARCH MODAL -->
         <div id="search-modal" class="modal-overlay" onclick="if(event.target===this)app.closeSearch()">
             <div class="modal-sheet">
-                <div class="modal-header">
-                    <h3>Rechercher</h3>
-                    <button class="modal-close" onclick="app.closeSearch()">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
-                <div class="input-group">
-                    <input type="text" id="search-input" placeholder="Rechercher une vente..." oninput="app.performSearch(this.value)">
-                </div>
+                <div class="modal-header"><h3>Rechercher</h3><button class="modal-close" onclick="app.closeSearch()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+                <div class="input-group"><input type="text" id="search-input" placeholder="Rechercher une location..." oninput="app.performSearch(this.value)"></div>
                 <div class="list-container" id="search-results"></div>
             </div>
         </div>
 
         <!-- USER DETAIL MODAL -->
         <div id="user-detail-modal" class="modal-overlay" onclick="if(event.target===this)app.closeUserDetail()">
-            <div class="modal-sheet">
-                <div id="user-detail-sheet"></div>
-            </div>
+            <div class="modal-sheet"><div id="user-detail-sheet"></div></div>
         </div>
 
         <!-- CREATE USER MODAL -->
         <div id="create-user-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateUserModal()">
             <div class="modal-sheet">
-                <div class="modal-header">
-                    <h3>Nouvel utilisateur</h3>
-                    <button class="modal-close" onclick="app.closeCreateUserModal()">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
+                <div class="modal-header"><h3>Nouvel utilisateur</h3><button class="modal-close" onclick="app.closeCreateUserModal()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
                 <form class="form-page" onsubmit="app.handleCreateUser(event)">
-                    <div class="input-group">
-                        <label for="dev-user-phone">Téléphone</label>
-                        <input type="tel" id="dev-user-phone" placeholder="+221 77 000 00 00" required inputmode="tel">
-                    </div>
-                    <div class="input-group">
-                        <label for="dev-user-name">Nom</label>
-                        <input type="text" id="dev-user-name" placeholder="Nom complet" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="dev-user-role">Rôle</label>
-                        <select id="dev-user-role">
-                            <option value="vendeur">Vendeur</option>
-                            <option value="developpeur">Développeur</option>
-                        </select>
+                    <div class="input-group"><label for="dev-user-phone">Téléphone</label><input type="tel" id="dev-user-phone" placeholder="+221 77 000 00 00" required inputmode="tel"></div>
+                    <div class="input-group"><label for="dev-user-name">Nom</label><input type="text" id="dev-user-name" placeholder="Nom complet" required></div>
+                    <div class="input-group"><label for="dev-user-role">Rôle</label>
+                        <select id="dev-user-role"><option value="vendeur">Vendeur</option><option value="developpeur">Développeur</option></select>
                     </div>
                     <button type="submit" class="btn btn-primary btn-full">Créer l'utilisateur</button>
                 </form>
@@ -410,31 +430,25 @@
         <!-- CREATE SHOP MODAL -->
         <div id="create-shop-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateShopModal()">
             <div class="modal-sheet">
-                <div class="modal-header">
-                    <h3>Nouvelle boutique</h3>
-                    <button class="modal-close" onclick="app.closeCreateShopModal()">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
+                <div class="modal-header"><h3>Nouvelle boutique</h3><button class="modal-close" onclick="app.closeCreateShopModal()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
                 <form class="form-page" onsubmit="app.handleCreateShop(event)">
-                    <div class="input-group">
-                        <label for="dev-shop-user-code">Code utilisateur</label>
-                        <input type="text" id="dev-shop-user-code" placeholder="Ex: USR1783964958" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="dev-shop-label">Libellé boutique</label>
-                        <input type="text" id="dev-shop-label" placeholder="Ex: Boutique centre" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="dev-shop-forfait">Forfait (essai)</label>
-                        <select id="dev-shop-forfait" required></select>
-                    </div>
-                    <div class="input-group">
-                        <label for="dev-shop-currency">Devise</label>
-                        <input type="text" id="dev-shop-currency" value="F">
-                    </div>
+                    <div class="input-group"><label for="dev-shop-user-code">Code utilisateur</label><input type="text" id="dev-shop-user-code" placeholder="Ex: USR1783964958" required></div>
+                    <div class="input-group"><label for="dev-shop-label">Libellé boutique</label><input type="text" id="dev-shop-label" placeholder="Ex: Boutique centre" required></div>
+                    <div class="input-group"><label for="dev-shop-forfait">Forfait (essai)</label><select id="dev-shop-forfait" required></select></div>
                     <button type="submit" class="btn btn-primary btn-full">Créer la boutique</button>
                 </form>
+            </div>
+        </div>
+
+        <!-- FLOATING ACTION BUTTON -->
+        <div id="fab-container" class="fab-container" style="display:none;">
+            <button class="fab" onclick="app.toggleFab()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <div class="fab-menu" id="fab-menu">
+                <button class="fab-menu-item" onclick="app.navigate('articles')"><span class="fab-menu-dot" style="background:#16A34A"></span>Articles</button>
+                <button class="fab-menu-item" onclick="app.navigate('nouvelle-location')"><span class="fab-menu-dot" style="background:#2563EB"></span>Nouvelle location</button>
+                <button class="fab-menu-item" onclick="app.navigate('clients')"><span class="fab-menu-dot" style="background:#9333EA"></span>Clients</button>
             </div>
         </div>
 
@@ -443,6 +457,10 @@
             <button class="nav-item active" onclick="app.navigate('dashboard')" data-page="dashboard">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 <span>Accueil</span>
+            </button>
+            <button class="nav-item" onclick="app.navigate('locations')" data-page="locations">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-3V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h1"></path><path d="M20 7v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8"></path><circle cx="9" cy="13" r="1"></circle><circle cx="14" cy="13" r="1"></circle></svg>
+                <span>Locations</span>
             </button>
             <button class="nav-item" onclick="app.navigate('history')" data-page="history">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -473,9 +491,7 @@
         <div id="confirm-modal" class="modal-overlay" onclick="if(event.target===this)app.closeConfirm()">
             <div class="modal-sheet confirm-sheet">
                 <div class="confirm-body">
-                    <div class="confirm-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </div>
+                    <div class="confirm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
                     <h3 class="confirm-title">Supprimer cette opération ?</h3>
                     <p class="confirm-message">Cette action est irréversible.</p>
                 </div>
@@ -485,6 +501,10 @@
                 </div>
             </div>
         </div>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>
     </div>
     <script src="js/app.js"></script>
 </body>

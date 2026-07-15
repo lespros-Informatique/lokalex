@@ -123,14 +123,13 @@ class DeveloperController extends Controller
 
         $codeBoutique = 'BTE' . time() . mt_rand(100, 999);
         $stmt = Database::getConnection()->prepare(
-            'INSERT INTO boutiques (code_boutique, user_code, libelle_boutique, devise_boutique, statut_boutique, created_at_boutique)
-             VALUES (:code_boutique, :user_code, :libelle_boutique, :devise_boutique, :statut_boutique, :created_at_boutique)'
+            'INSERT INTO boutiques (code_boutique, user_code, libelle_boutique, statut_boutique, created_at_boutique)
+             VALUES (:code_boutique, :user_code, :libelle_boutique, :statut_boutique, :created_at_boutique)'
         );
         $stmt->execute([
             'code_boutique' => $codeBoutique,
             'user_code' => $userCode,
             'libelle_boutique' => $label,
-            'devise_boutique' => $currency,
             'statut_boutique' => 'actif',
             'created_at_boutique' => date('Y-m-d H:i:s'),
         ]);
@@ -214,33 +213,20 @@ class DeveloperController extends Controller
 
         $shop = Shop::findByUserCode($userCode);
 
-        $sales = [];
-        $expenses = [];
         $transactions = [];
         $pagination = ['page' => 1, 'limit' => 20, 'total' => 0, 'has_more' => false];
 
         if ($shop) {
-            $sales = Sale::getAllByShop($shop['code_boutique']);
-            $expenses = Expense::getAllByShop($shop['code_boutique']);
+            $locations = Location::allByBoutique($shop['code_boutique']);
 
-            foreach ($sales as $sale) {
+            foreach ($locations as $loc) {
                 $transactions[] = [
-                    'type' => 'vente',
-                    'id' => $sale['code_vente'],
-                    'amount' => (float) $sale['montant_vente'],
-                    'mode' => $sale['mode_paiement_vente'],
-                    'date' => $sale['created_at_vente'],
-                ];
-            }
-
-            foreach ($expenses as $expense) {
-                $transactions[] = [
-                    'type' => 'depense',
-                    'id' => $expense['code_depense'],
-                    'title' => $expense['libelle_depense'],
-                    'amount' => (float) $expense['montant_depense'],
-                    'mode' => '-',
-                    'date' => $expense['date_depense_depense'],
+                    'type' => 'location',
+                    'id' => $loc['code_location'],
+                    'title' => $loc['nom_client'] ?? 'Client',
+                    'amount' => (float) $loc['montant_location'],
+                    'mode' => $loc['statut_location'],
+                    'date' => $loc['created_at_location'],
                 ];
             }
 
@@ -278,7 +264,7 @@ class DeveloperController extends Controller
         $where = '';
         $params = [];
         if ($search !== '') {
-            $where = 'WHERE libelle_boutique LIKE :search1 OR code_boutique LIKE :search2 OR devise_boutique LIKE :search3';
+            $where = 'WHERE libelle_boutique LIKE :search1 OR code_boutique LIKE :search2 OR ville_boutique LIKE :search3';
             $params[':search1'] = '%' . $search . '%';
             $params[':search2'] = '%' . $search . '%';
             $params[':search3'] = '%' . $search . '%';
@@ -294,7 +280,7 @@ class DeveloperController extends Controller
 
         $limitInt = (int)$limit;
         $offsetInt = (int)(($page - 1) * $limit);
-        $sql = 'SELECT id, code_boutique, user_code, libelle_boutique, devise_boutique, statut_boutique, created_at_boutique FROM boutiques ' . $where . ' ORDER BY created_at_boutique DESC LIMIT ' . $limitInt . ' OFFSET ' . $offsetInt;
+        $sql = 'SELECT id_boutique, code_boutique, user_code, libelle_boutique, ville_boutique, statut_boutique, created_at_boutique FROM boutiques ' . $where . ' ORDER BY created_at_boutique DESC LIMIT ' . $limitInt . ' OFFSET ' . $offsetInt;
         $stmt = Database::getConnection()->prepare($sql);
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v);
@@ -329,27 +315,17 @@ class DeveloperController extends Controller
             Response::error('Boutique introuvable', [], 404);
         }
 
-        $sales = Sale::getAllByShop($shopCode);
-        $expenses = Expense::getAllByShop($shopCode);
+        $locations = Location::allByBoutique($shopCode);
 
         $transactions = [];
-        foreach ($sales as $sale) {
+        foreach ($locations as $loc) {
             $transactions[] = [
-                'type' => 'vente',
-                'id' => $sale['code_vente'],
-                'amount' => (float) $sale['montant_vente'],
-                'mode' => $sale['mode_paiement_vente'],
-                'date' => $sale['created_at_vente'],
-            ];
-        }
-        foreach ($expenses as $expense) {
-            $transactions[] = [
-                'type' => 'depense',
-                'id' => $expense['code_depense'],
-                'title' => $expense['libelle_depense'],
-                'amount' => (float) $expense['montant_depense'],
-                'mode' => '-',
-                'date' => $expense['date_depense_depense'],
+                'type' => 'location',
+                'id' => $loc['code_location'],
+                'title' => $loc['nom_client'] ?? 'Client',
+                'amount' => (float) $loc['montant_location'],
+                'mode' => $loc['statut_location'],
+                'date' => $loc['created_at_location'],
             ];
         }
         usort($transactions, function ($a, $b) { return strtotime($b['date']) - strtotime($a['date']); });
@@ -366,16 +342,17 @@ class DeveloperController extends Controller
             'has_more' => ($txPage * $txLimit) < $total,
         ];
 
-        $totalSales = array_sum(array_column($sales, 'montant_vente'));
-        $totalExpenses = array_sum(array_column($expenses, 'montant_depense'));
+        $totalMontant = array_sum(array_column($locations, 'montant_location'));
+        $totalReste = array_sum(array_column($locations, 'reste_location'));
+        $totalEncaisse = $totalMontant - $totalReste;
 
         Response::success('Détail boutique', [
             'shop' => $shop,
             'transactions' => $transactions,
             'totals' => [
-                'sales' => $this->formatMoney($totalSales),
-                'expenses' => $this->formatMoney($totalExpenses),
-                'net' => $this->formatMoney($totalSales - $totalExpenses),
+                'sales' => $this->formatMoney($totalMontant),
+                'expenses' => $this->formatMoney($totalReste),
+                'net' => $this->formatMoney($totalEncaisse),
             ],
             'pagination' => $pagination,
         ]);

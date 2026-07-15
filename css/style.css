@@ -1330,3 +1330,50 @@ html, body {
 .btn-secondary:active {
     background: #F3F4F6;
 }
+
+/* LOKALEX : statuts de location */
+.badge-en_cours { background: #DCFCE7; color: #15803D; }
+.badge-terminee { background: #DBEAFE; color: #1D4ED8; }
+.badge-retard { background: #FEE2E2; color: #B91C1C; }
+
+.selected-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #EFF6FF;
+    color: #1E3A8A;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+}
+.selected-chip button { background: none; border: none; color: inherit; font-size: 16px; cursor: pointer; line-height: 1; }
+
+.ligne-row {
+    display: grid;
+    grid-template-columns: 1fr 64px 80px auto;
+    gap: 8px;
+    align-items: center;
+    background: var(--white);
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px var(--shadow);
+    margin-bottom: 8px;
+}
+.ligne-row .ligne-remove { background: #FEE2E2; color: #B91C1C; border: none; border-radius: 8px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; }
+
+.readonly-amount { font-size: 22px; font-weight: 700; color: #1E3A8A; padding: 8px 0; }
+
+.detail-actions { display: flex; gap: 12px; margin-top: 16px; }
+.detail-actions .btn { flex: 1; }
+
+.reabonnement-row { display: flex; gap: 10px; align-items: center; }
+.reabonnement-row .abonnement-statut { flex: 1; }
+
+.fab-container.open .fab-menu { display: flex; }
+.fab-menu { display: none; flex-direction: column; gap: 8px; position: absolute; bottom: 76px; right: 16px; }
+.fab-menu-item { display: flex; align-items: center; gap: 10px; background: var(--white); border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 16px; font-weight: 600; color: var(--text); box-shadow: 0 4px 12px var(--shadow); white-space: nowrap; }
+.fab-menu-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+.client-picker { position: relative; }
+.client-picker .list-container { margin-top: 8px; max-height: 220px; overflow-y: auto; }
