@@ -235,9 +235,9 @@ const app = {
                     <h3 class="expired-title">Votre période d'essai est terminée</h3>
                     <p class="expired-message">Pour continuer à utiliser LOKALEX, veuillez renouveler votre abonnement.</p>
                     <div class="expired-contact">
-                        <a class="expired-contact-item" href="tel:${this.escapeHtml(c.phone)}"><span>📞 Contact</span><strong>${this.escapeHtml(c.phone)}</strong></a>
-                        <a class="expired-contact-item" href="${this.escapeHtml(c.whatsapp)}" target="_blank" rel="noopener"><span>📱 WhatsApp</span><strong>Écrivez-nous</strong></a>
-                        <div class="expired-contact-item"><span>💳 Paiement</span><strong>${this.escapeHtml(c.wave)} / ${this.escapeHtml(c.orange)}</strong></div>
+                        <a class="expired-contact-item" href="tel:${this.escapeHtml(c.phone)}"><span>Contact</span><strong>${this.escapeHtml(c.phone)}</strong></a>
+                        <a class="expired-contact-item" href="${this.escapeHtml(c.whatsapp)}" target="_blank" rel="noopener"><span>WhatsApp</span><strong>Écrivez-nous</strong></a>
+                        <div class="expired-contact-item"><span>Paiement</span><strong>${this.escapeHtml(c.wave)} / ${this.escapeHtml(c.orange)}</strong></div>
                     </div>
                 </div>`;
             return;
@@ -329,8 +329,13 @@ const app = {
         if (!isDev && !this.currentShop) return;
         const metricsGrid = document.querySelector('#page-dashboard .metrics-grid');
         const recentList = document.getElementById('recent-list');
-        if (metricsGrid && !isDev) this.showSkeleton(metricsGrid, 'dashboard');
         if (recentList && !isDev) this.showSkeleton(recentList, 'list');
+        if (metricsGrid && !isDev) {
+            ['dash-en-cours', 'dash-retours', 'dash-montant', 'dash-clients', 'dash-retards'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '';
+            });
+        }
         try {
             const data = await this.api(`/dashboard?client_date=${this.getClientDate()}`);
             if (isDev) {
@@ -350,11 +355,16 @@ const app = {
                 return;
             }
             if (metricsGrid) {
-                document.getElementById('dash-en-cours').textContent = data.data.en_cours;
-                document.getElementById('dash-retours').textContent = data.data.retours_prevus;
-                document.getElementById('dash-montant').textContent = data.data.montant_jour;
-                document.getElementById('dash-clients').textContent = data.data.clients;
-                document.getElementById('dash-retards').textContent = data.data.retards;
+                const enCours = document.getElementById('dash-en-cours');
+                const retours = document.getElementById('dash-retours');
+                const montant = document.getElementById('dash-montant');
+                const clients = document.getElementById('dash-clients');
+                const retards = document.getElementById('dash-retards');
+                if (enCours) enCours.textContent = data.data.en_cours ?? 0;
+                if (retours) retours.textContent = data.data.retours_prevus ?? 0;
+                if (montant) montant.textContent = this.formatMoney(parseFloat(data.data.montant_jour) || 0);
+                if (clients) clients.textContent = data.data.clients ?? 0;
+                if (retards) retards.textContent = data.data.retards ?? 0;
             }
             const nameEl = document.getElementById('dash-user-name');
             if (nameEl) nameEl.textContent = this.currentUser ? this.currentUser.nom_user : '';
@@ -380,7 +390,7 @@ const app = {
     },
 
     statutBadge(statut) {
-        const map = { en_cours: ['badge-en_cours', '🟢 En cours'], terminee: ['badge-terminee', '🔵 Terminée'], retard: ['badge-retard', '🔴 En retard'] };
+        const map = { en_cours: ['badge-en_cours', 'En cours'], terminee: ['badge-terminee', 'Terminée'], retard: ['badge-retard', 'En retard'] };
         const [cls, label] = map[statut] || ['badge-inactif', statut];
         return `<span class="badge ${cls}">${label}</span>`;
     },
@@ -675,12 +685,12 @@ const app = {
         if (!list) return;
         this.showSkeleton(list, 'list');
         const q = this.locationSearch || '';
-        let url = '/locations?';
+        let url = '/locations';
         const params = [];
         if (q) params.push('q=' + encodeURIComponent(q));
         if (this.locationFilter === 'retard') params.push('statut=en_cours');
         else if (this.locationFilter) params.push('statut=' + encodeURIComponent(this.locationFilter));
-        url += params.join('&');
+        if (params.length) url += '?' + params.join('&');
         try {
             const data = await this.api(url);
             let locations = data.data.locations || [];
