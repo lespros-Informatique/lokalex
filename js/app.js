@@ -94,6 +94,7 @@ const app = {
             this.currentShop = s.shop || null;
             const isDev = this.currentUser && this.currentUser.role_user === 'developpeur';
             document.querySelectorAll('.dev-only').forEach(el => el.style.display = isDev ? '' : 'none');
+            document.querySelectorAll('.dev-hidden').forEach(el => el.style.display = isDev ? 'none' : '');
             const logoutBtn = document.getElementById('logout-top');
             if (logoutBtn) logoutBtn.style.display = isDev ? 'flex' : 'flex';
             const downloadBtn = document.getElementById('download-top');
@@ -148,6 +149,7 @@ const app = {
         this.closeLocationDetail();
 
         document.querySelectorAll('.dev-only').forEach(el => el.style.display = isDev ? '' : 'none');
+        document.querySelectorAll('.dev-hidden').forEach(el => el.style.display = isDev ? 'none' : '');
 
         document.querySelectorAll('.nav-item').forEach(i => {
             const pageName = i.dataset.page;
