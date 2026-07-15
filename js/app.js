@@ -362,7 +362,7 @@ const app = {
                 const retards = document.getElementById('dash-retards');
                 if (enCours) enCours.textContent = data.data.en_cours ?? 0;
                 if (retours) retours.textContent = data.data.retours_prevus ?? 0;
-                if (montant) montant.textContent = this.formatMoney(parseFloat(data.data.montant_jour) || 0);
+                if (montant) montant.textContent = data.data.montant_jour ?? '0 F';
                 if (clients) clients.textContent = data.data.clients ?? 0;
                 if (retards) retards.textContent = data.data.retards ?? 0;
             }

@@ -436,9 +436,9 @@ html, body {
 .badge {
     display: inline-flex;
     align-items: center;
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 600;
     text-transform: capitalize;
 }
