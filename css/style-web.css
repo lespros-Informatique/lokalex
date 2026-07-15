@@ -142,6 +142,37 @@
         flex-shrink: 0;
     }
 
+    .sidebar-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 8px 14px;
+        opacity: 0.8;
+    }
+
+    .sidebar.collapsed .sidebar-divider {
+        margin: 8px 16px;
+    }
+
+    .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .section-head .section-title {
+        margin-bottom: 0;
+    }
+
+    .section-head .btn-search-trigger {
+        width: auto;
+        margin-top: 0;
+        padding: 8px 14px;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
     .sidebar-nav .nav-item:hover {
         background: var(--primary-light);
         color: var(--primary);
