@@ -11,11 +11,16 @@ class CategorieController extends Controller
         if (!$shop) {
             Response::error('Boutique introuvable', [], 404);
         }
-        Response::success('Catégories', ['categories' => Categorie::all($shop['code_boutique'])]);
+        $categories = Categorie::all($shop['code_boutique']);
+        $total = count($categories);
+        $params = $this->paginationParams();
+        $items = array_slice($categories, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 
     public function store(): void
     {
+        $this->requireCsrf();
         $user = $this->requireActiveSubscription();
         $shop = Shop::findByUserCode($user['code_user']);
         if (!$shop) {

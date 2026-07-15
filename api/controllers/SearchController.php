@@ -17,8 +17,8 @@ class SearchController extends Controller
             Response::success('Résultats de recherche', ['results' => []]);
         }
 
-        $results = Location::allByBoutique($shop['code_boutique'], $query);
-        $formatted = array_map(function ($loc) {
+        $locations = Location::allByBoutique($shop['code_boutique'], $query);
+        $results = array_map(function ($loc) {
             $date = new DateTime($loc['created_at_location']);
             return [
                 'type' => 'location',
@@ -29,8 +29,11 @@ class SearchController extends Controller
                 'reste' => (float) $loc['reste_location'],
                 'statut' => $loc['statut_location'],
             ];
-        }, $results);
+        }, $locations);
 
-        Response::success('Résultats de recherche', ['results' => $formatted]);
+        $total = count($results);
+        $params = $this->paginationParams();
+        $items = array_slice($results, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 }

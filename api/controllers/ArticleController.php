@@ -11,11 +11,16 @@ class ArticleController extends Controller
         if (!$shop) {
             Response::error('Boutique introuvable', [], 404);
         }
-        Response::success('Articles', ['articles' => Article::allByBoutique($shop['code_boutique'])]);
+        $articles = Article::allByBoutique($shop['code_boutique']);
+        $total = count($articles);
+        $params = $this->paginationParams();
+        $items = array_slice($articles, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 
     public function store(): void
     {
+        $this->requireCsrf();
         $user = $this->requireActiveSubscription();
         $shop = Shop::findByUserCode($user['code_user']);
         if (!$shop) {
@@ -47,6 +52,7 @@ class ArticleController extends Controller
 
     public function update(): void
     {
+        $this->requireCsrf();
         $user = $this->requireActiveSubscription();
         $shop = Shop::findByUserCode($user['code_user']);
         if (!$shop) {
@@ -76,6 +82,7 @@ class ArticleController extends Controller
 
     public function desactiver(): void
     {
+        $this->requireCsrf();
         $user = $this->requireActiveSubscription();
         $shop = Shop::findByUserCode($user['code_user']);
         if (!$shop) {

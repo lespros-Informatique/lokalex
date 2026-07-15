@@ -15,6 +15,7 @@ class DeveloperController extends Controller
 
     public function listUsers(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $page = max(1, (int)($_GET['page'] ?? 1));
@@ -38,9 +39,8 @@ class DeveloperController extends Controller
         $countStmt->execute();
         $total = (int)$countStmt->fetchColumn();
 
-        $limitInt = (int)$limit;
-        $offsetInt = (int)(($page - 1) * $limit);
-        $sql = 'SELECT id_user, code_user, role_user, nom_user, telephone_user, statut_user, created_at_user FROM users ' . $where . ' ORDER BY created_at_user DESC LIMIT ' . $limitInt . ' OFFSET ' . $offsetInt;
+        $offsetInt = ($page - 1) * $limit;
+        $sql = 'SELECT id_user, code_user, role_user, nom_user, telephone_user, statut_user, created_at_user FROM users ' . $where . ' ORDER BY created_at_user DESC LIMIT ' . $limit . ' OFFSET ' . $offsetInt;
         $stmt = Database::getConnection()->prepare($sql);
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v);
@@ -48,19 +48,12 @@ class DeveloperController extends Controller
         $stmt->execute();
         $users = $stmt->fetchAll();
 
-        Response::success('Liste des utilisateurs', [
-            'users' => $users,
-            'pagination' => [
-                'page' => $page,
-                'limit' => $limit,
-                'total' => $total,
-                'has_more' => $page * $limit < $total,
-            ],
-        ]);
+        $this->paginatedResponse($users, $total);
     }
 
     public function createUser(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $phone = trim($this->input('phone', $this->input('telephone', '')));
@@ -97,6 +90,7 @@ class DeveloperController extends Controller
 
     public function createShop(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $userCode = trim($this->input('user_code', ''));
@@ -159,6 +153,7 @@ class DeveloperController extends Controller
 
     public function createAbonnement(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $boutiqueCode = trim($this->input('boutique_code', ''));
@@ -199,6 +194,7 @@ class DeveloperController extends Controller
 
     public function userDetail(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $userCode = trim($_GET['code'] ?? '');
@@ -255,6 +251,7 @@ class DeveloperController extends Controller
 
     public function listShops(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $page = max(1, (int)($_GET['page'] ?? 1));
@@ -278,9 +275,8 @@ class DeveloperController extends Controller
         $countStmt->execute();
         $total = (int)$countStmt->fetchColumn();
 
-        $limitInt = (int)$limit;
-        $offsetInt = (int)(($page - 1) * $limit);
-        $sql = 'SELECT id_boutique, code_boutique, user_code, libelle_boutique, ville_boutique, statut_boutique, created_at_boutique FROM boutiques ' . $where . ' ORDER BY created_at_boutique DESC LIMIT ' . $limitInt . ' OFFSET ' . $offsetInt;
+        $offsetInt = ($page - 1) * $limit;
+        $sql = 'SELECT id_boutique, code_boutique, user_code, libelle_boutique, ville_boutique, statut_boutique, created_at_boutique FROM boutiques ' . $where . ' ORDER BY created_at_boutique DESC LIMIT ' . $limit . ' OFFSET ' . $offsetInt;
         $stmt = Database::getConnection()->prepare($sql);
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v);
@@ -288,19 +284,12 @@ class DeveloperController extends Controller
         $stmt->execute();
         $shops = $stmt->fetchAll();
 
-        Response::success('Liste des boutiques', [
-            'shops' => $shops,
-            'pagination' => [
-                'page' => $page,
-                'limit' => $limit,
-                'total' => $total,
-                'has_more' => $page * $limit < $total,
-            ],
-        ]);
+        $this->paginatedResponse($shops, $total);
     }
 
     public function shopDetail(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $shopCode = trim($_GET['code'] ?? '');
@@ -368,13 +357,18 @@ class DeveloperController extends Controller
 
     public function listForfaitsDev(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
         $forfaits = Forfait::all();
-        Response::success('Forfaits', ['forfaits' => $forfaits]);
+        $total = count($forfaits);
+        $params = $this->paginationParams();
+        $items = array_slice($forfaits, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 
     public function createForfait(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $libelle = trim($this->input('libelle', $this->input('libelle_forfait', '')));
@@ -406,13 +400,18 @@ class DeveloperController extends Controller
 
     public function listAbonnements(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
         $abonnements = Abonnement::all();
-        Response::success('Abonnements', ['abonnements' => $abonnements]);
+        $total = count($abonnements);
+        $params = $this->paginationParams();
+        $items = array_slice($abonnements, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 
     public function setAbonnementStatut(): void
     {
+        $this->requireCsrf();
         $this->requireDeveloper();
 
         $code = trim($this->input('code', $this->input('code_abonnement', '')));

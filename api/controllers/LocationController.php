@@ -14,7 +14,10 @@ class LocationController extends Controller
         $search = trim($_GET['q'] ?? '');
         $statut = trim($_GET['statut'] ?? '');
         $locations = Location::allByBoutique($shop['code_boutique'], $search, $statut);
-        Response::success('Locations', ['locations' => $locations]);
+        $total = count($locations);
+        $params = $this->paginationParams();
+        $items = array_slice($locations, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 
     public function show(): void
@@ -48,6 +51,7 @@ class LocationController extends Controller
 
     public function store(): void
     {
+        $this->requireCsrf();
         $user = $this->requireActiveSubscription();
         $shop = Shop::findByUserCode($user['code_user']);
         if (!$shop) {
@@ -127,6 +131,7 @@ class LocationController extends Controller
 
     public function retour(): void
     {
+        $this->requireCsrf();
         $user = $this->requireActiveSubscription();
         $shop = Shop::findByUserCode($user['code_user']);
         if (!$shop) {
@@ -173,6 +178,7 @@ class LocationController extends Controller
 
     public function addPaiement(): void
     {
+        $this->requireCsrf();
         $user = $this->requireActiveSubscription();
         $shop = Shop::findByUserCode($user['code_user']);
         if (!$shop) {

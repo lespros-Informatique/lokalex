@@ -26,4 +26,6 @@ return [
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ],
+    'jwt_secret' => 'LOKALEX_SECRET_2026_CHANGE_IN_PROD',
+    'csrf_secret' => 'LOKALEX_CSRF_2026_CHANGE_IN_PROD',
 ];

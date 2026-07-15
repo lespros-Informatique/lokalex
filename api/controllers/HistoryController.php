@@ -42,7 +42,10 @@ class HistoryController extends Controller
             return strtotime($b['meta']) - strtotime($a['meta']);
         });
 
-        Response::success('Historique', ['items' => $items]);
+        $total = count($items);
+        $params = $this->paginationParams();
+        $pageItems = array_slice($items, $params['offset'], $params['limit']);
+        $this->paginatedResponse($pageItems, $total);
     }
 
     private function matchFilter(DateTime $date, string $filter, $clientDate = null): bool

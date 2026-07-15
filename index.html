@@ -106,6 +106,7 @@
                 </div>
             </div>
             <div class="list-container" id="article-list"></div>
+            <button class="btn-load-more" id="article-load-more" style="display:none;" onclick="app.loadMoreArticles()">Charger plus</button>
             <div class="bottom-spacer"></div>
         </div>
 
@@ -124,6 +125,7 @@
                 <input type="text" class="dev-search-input" id="client-search" placeholder="Rechercher un client..." oninput="app.onClientSearch(this.value)">
             </div>
             <div class="list-container" id="client-list"></div>
+            <button class="btn-load-more" id="client-load-more" style="display:none;" onclick="app.loadMoreClients()">Charger plus</button>
             <div class="bottom-spacer"></div>
         </div>
 
@@ -139,6 +141,7 @@
                 </div>
             </div>
             <div class="list-container" id="categorie-list"></div>
+            <button class="btn-load-more" id="categorie-load-more" style="display:none;" onclick="app.loadMoreCategories()">Charger plus</button>
             <div class="bottom-spacer"></div>
         </div>
 
@@ -200,6 +203,7 @@
                 <input type="text" class="dev-search-input" id="location-search" placeholder="Nom, téléphone..." oninput="app.onLocationSearch(this.value)">
             </div>
             <div class="list-container" id="location-list"></div>
+            <button class="btn-load-more" id="location-load-more" style="display:none;" onclick="app.loadMoreLocations()">Charger plus</button>
             <div class="bottom-spacer"></div>
         </div>
 
@@ -216,6 +220,7 @@
                 <button class="filter-btn" onclick="app.setHistoryFilter('year')" data-filter="year">Année</button>
             </div>
             <div class="list-container" id="history-list"></div>
+            <button class="btn-load-more" id="history-load-more" style="display:none;" onclick="app.loadMoreHistory()">Charger plus</button>
             <div class="bottom-spacer"></div>
         </div>
 
@@ -287,6 +292,7 @@
                 </div>
             </div>
             <div class="list-container" id="dev-forfait-list"></div>
+            <button class="btn-load-more" id="dev-forfait-load-more" style="display:none;" onclick="app.loadMoreDevForfaits()">Charger plus</button>
             <div class="bottom-spacer"></div>
         </div>
 
@@ -297,6 +303,7 @@
                 <p class="header-subtitle">Tous les abonnements</p>
             </div>
             <div class="list-container" id="dev-abonnement-list"></div>
+            <button class="btn-load-more" id="dev-abonnement-load-more" style="display:none;" onclick="app.loadMoreDevAbonnements()">Charger plus</button>
             <div class="bottom-spacer"></div>
         </div>
 
@@ -409,6 +416,7 @@
                 <div class="modal-header"><h3>Rechercher</h3><button class="modal-close" onclick="app.closeSearch()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
                 <div class="input-group"><input type="text" id="search-input" placeholder="Rechercher une location..." oninput="app.performSearch(this.value)"></div>
                 <div class="list-container" id="search-results"></div>
+                <button class="btn-load-more" id="search-load-more" style="display:none;" onclick="app.loadMoreSearch()">Charger plus</button>
             </div>
         </div>
 
@@ -499,20 +507,7 @@
             </button>
         </div>
 
-        <!-- CONFIRM MODAL -->
-        <div id="confirm-modal" class="modal-overlay" onclick="if(event.target===this)app.closeConfirm()">
-            <div class="modal-sheet confirm-sheet">
-                <div class="confirm-body">
-                    <div class="confirm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
-                    <h3 class="confirm-title">Supprimer cette opération ?</h3>
-                    <p class="confirm-message">Cette action est irréversible.</p>
-                </div>
-                <div class="confirm-actions">
-                    <button class="btn btn-secondary" onclick="app.closeConfirm()">Annuler</button>
-                    <button class="btn btn-danger" onclick="app.confirmDelete()">Supprimer</button>
-                </div>
-            </div>
-        </div>
+
     </div>
     <script src="js/app.js"></script>
 </body>

@@ -27,6 +27,10 @@ const app = {
     userTxPage: 1,
     userTxLimit: 15,
     userTxHasMore: false,
+    listPage: 1,
+    listLimit: 20,
+    listHasMore: false,
+    listItems: [],
     contact: {
         phone: '+225 05 66 01 55 16',
         whatsapp: 'https://wa.me/2250566015516',
@@ -117,6 +121,8 @@ const app = {
                 item.classList.add('active');
             });
         });
+        window.addEventListener('online', () => this.toast('Connexion rétablie', 'success'));
+        window.addEventListener('offline', () => this.toast('Pas de connexion Internet', 'error'));
     },
 
     navigate(page) {
@@ -161,33 +167,40 @@ const app = {
         });
 
         if (page === 'dashboard') this.renderDashboard();
-        if (page === 'articles') this.renderArticles();
-        if (page === 'categories') this.renderCategories();
-        if (page === 'clients') this.renderClients();
-        if (page === 'locations') this.renderLocations();
-        if (page === 'history') this.renderHistory();
+        if (page === 'articles') { this.listPage = 1; this.listHasMore = false; this.renderArticles(); }
+        if (page === 'categories') { this.listPage = 1; this.listHasMore = false; this.renderCategories(); }
+        if (page === 'clients') { this.listPage = 1; this.listHasMore = false; this.renderClients(); }
+        if (page === 'locations') { this.listPage = 1; this.listHasMore = false; this.renderLocations(); }
+        if (page === 'history') { this.listPage = 1; this.listHasMore = false; this.renderHistory(); }
         if (page === 'reports') this.renderReports();
         if (page === 'nouvelle-location') this.renderNouvelleLocation();
         if (page === 'dev-list') { this.devUserPage = 1; this.devUserSearch = ''; const us = document.getElementById('dev-user-search'); if (us) us.value = ''; this.renderDevUsers(); }
         if (page === 'dev-shops') { this.devShopPage = 1; this.devShopSearch = ''; const ss = document.getElementById('dev-shop-search'); if (ss) ss.value = ''; this.renderDevShops(); }
-        if (page === 'dev-forfaits') this.renderDevForfaits();
-        if (page === 'dev-abonnements') this.renderDevAbonnements();
+        if (page === 'dev-forfaits') { this.listPage = 1; this.listHasMore = false; this.renderDevForfaits(); }
+        if (page === 'dev-abonnements') { this.listPage = 1; this.listHasMore = false; this.renderDevAbonnements(); }
         if (page === 'subscription') this.renderSubscription();
     },
 
     async api(url, options = {}) {
         const loader = this._showLoader();
         try {
+            const csrf = this.getCsrfToken();
             const token = this.getAuthToken();
             const headers = {
                 'Content-Type': 'application/json',
                 ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                ...(csrf ? { 'X-CSRF-Token': csrf } : {}),
             };
+            const controller = new AbortController();
+            const timeout = options.timeout || 30000;
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
             const response = await fetch(`${API_BASE}${url}`, {
                 ...options,
                 headers: { ...headers, ...options.headers },
                 credentials: 'same-origin',
+                signal: controller.signal,
             });
+            clearTimeout(timeoutId);
             const text = await response.text();
             let data;
             try {
@@ -208,6 +221,14 @@ const app = {
                 throw err;
             }
             return data;
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                throw new Error('La requête a expiré. Vérifiez votre connexion.');
+            }
+            if (!navigator.onLine) {
+                throw new Error('Pas de connexion Internet.');
+            }
+            throw err;
         } finally {
             this._hideLoader(loader);
         }
@@ -226,8 +247,16 @@ const app = {
     },
 
     getAuthToken() {
-        const match = document.cookie.match(/nafa_token=([^;]+)/);
-        return match ? match[1] : null;
+        const cookieMatch = document.cookie.match(/nafa_token=([^;]+)/);
+        if (cookieMatch) return cookieMatch[1];
+        const stored = localStorage.getItem('lokalex_token');
+        return stored ? stored : null;
+    },
+
+    getCsrfToken() {
+        const cookieMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
+        return null;
     },
 
     async renderSubscription() {
@@ -249,7 +278,7 @@ const app = {
         }
         try {
             const data = await this.api('/forfaits');
-            const forfaits = data.data.forfaits;
+            const forfaits = data.data.items || [];
             if (!forfaits.length) { list.innerHTML = '<div class="empty-state">Aucun forfait disponible</div>'; return; }
             list.innerHTML = forfaits.map(f => `
                 <div class="list-item">
@@ -287,6 +316,9 @@ const app = {
             const data = await this.api('/auth/login', { method: 'POST', body: JSON.stringify({ phone }) });
             this.currentUser = data.data.user;
             this.currentShop = data.data.shop || null;
+            if (data.data.token) {
+                localStorage.setItem('lokalex_token', data.data.token);
+            }
             this.saveSession();
             this.navigate('dashboard');
             this.toast('Connexion réussie', 'success');
@@ -312,6 +344,7 @@ const app = {
             this.currentUser = null;
             this.currentShop = null;
             localStorage.removeItem('lokalex_session');
+            localStorage.removeItem('lokalex_token');
             this.navigate('login');
             this.toast('Déconnexion réussie', 'success');
             this.setButtonLoading(menuBtn, false);
@@ -408,15 +441,17 @@ const app = {
         return `<span class="badge ${cls}">${label}</span>`;
     },
 
-    async renderArticles() {
+    async renderArticles(append = false) {
         const list = document.getElementById('article-list');
         if (!list) return;
-        this.showSkeleton(list, 'list');
+        if (!append) { this.showSkeleton(list, 'list'); this.listPage = 1; }
         try {
-            const data = await this.api('/articles');
-            this.articles = data.data.articles || [];
-            if (!this.articles.length) { list.innerHTML = '<div class="empty-state">Aucun article. Ajoutez votre matériel.</div>'; return; }
-            list.innerHTML = this.articles.map(a => `
+            const params = new URLSearchParams({ page: this.listPage, limit: this.listLimit });
+            const data = await this.api(`/articles?${params.toString()}`);
+            const articles = data.data.items || [];
+            this.articles = articles;
+            const pagination = data.data.pagination || {};
+            const html = articles.map(a => `
                 <div class="list-item">
                     <div class="list-item-info">
                         <div class="list-item-title">${this.escapeHtml(a.libelle_article)}</div>
@@ -429,10 +464,17 @@ const app = {
                     </button>
                     ${a.statut_article === 'actif' ? `<button class="list-item-arrow" onclick="app.desactiverArticle('${this.escapeHtml(a.code_article)}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ''}
                 </div>`).join('');
+            list.innerHTML = append ? (list.innerHTML + html) : (html || '<div class="empty-state">Aucun article. Ajoutez votre matériel.</div>');
+            this.listHasMore = pagination.has_more || false;
+            const btn = document.getElementById('article-load-more');
+            if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
         } catch (err) {
+            if (!append) list.innerHTML = '<div class="empty-state">Erreur</div>';
             this.toast(err.message, 'error');
         }
     },
+
+    loadMoreArticles() { this.listPage++; this.renderArticles(true); },
 
     async openCreateArticleModal() {
         await this.loadCategorieOptions('article-categorie');
@@ -468,13 +510,14 @@ const app = {
     async handleCreateArticle(e) {
         e.preventDefault();
         const code = document.getElementById('article-code').value.trim();
-        const payload = {
-            libelle: document.getElementById('article-libelle').value.trim(),
-            categorie_code: document.getElementById('article-categorie').value.trim(),
-            quantite: parseInt(document.getElementById('article-quantite').value, 10) || 0,
-            prix_location: parseFloat(document.getElementById('article-prix').value) || 0,
-        };
-        if (!payload.libelle) { this.toast('Nom requis', 'error'); return; }
+        const libelle = document.getElementById('article-libelle').value.trim();
+        const categorie_code = document.getElementById('article-categorie').value.trim();
+        const quantite = parseInt(document.getElementById('article-quantite').value, 10) || 0;
+        const prix_location = parseFloat(document.getElementById('article-prix').value) || 0;
+        if (!libelle) { this.toast('Nom requis', 'error'); return; }
+        if (quantite < 0) { this.toast('Quantité invalide', 'error'); return; }
+        if (prix_location < 0) { this.toast('Prix invalide', 'error'); return; }
+        const payload = { libelle, categorie_code, quantite, prix_location };
         const btn = e.target.querySelector('button[type="submit"]');
         this.setButtonLoading(btn, true);
         try {
@@ -520,15 +563,16 @@ const app = {
         }
     },
 
-    async renderCategories() {
+    async renderCategories(append = false) {
         const list = document.getElementById('categorie-list');
         if (!list) return;
-        this.showSkeleton(list, 'list');
+        if (!append) { this.showSkeleton(list, 'list'); this.listPage = 1; }
         try {
-            const data = await this.api('/categories');
-            const categories = data.data.categories || [];
-            if (!categories.length) { list.innerHTML = '<div class="empty-state">Aucune catégorie.</div>'; return; }
-            list.innerHTML = categories.map(c => `
+            const params = new URLSearchParams({ page: this.listPage, limit: this.listLimit });
+            const data = await this.api(`/categories?${params.toString()}`);
+            const categories = data.data.items || [];
+            const pagination = data.data.pagination || {};
+            const html = categories.map(c => `
                 <div class="list-item">
                     <div class="list-item-info">
                         <div class="list-item-title">${this.escapeHtml(c.libelle_categorie)}</div>
@@ -536,10 +580,17 @@ const app = {
                     </div>
                     <span class="badge ${c.statut_categorie === 'actif' ? 'badge-actif' : 'badge-inactif'}">${c.statut_categorie}</span>
                 </div>`).join('');
+            list.innerHTML = append ? (list.innerHTML + html) : (html || '<div class="empty-state">Aucune catégorie.</div>');
+            this.listHasMore = pagination.has_more || false;
+            const btn = document.getElementById('categorie-load-more');
+            if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
         } catch (err) {
+            if (!append) list.innerHTML = '<div class="empty-state">Erreur</div>';
             this.toast(err.message, 'error');
         }
     },
+
+    loadMoreCategories() { this.listPage++; this.renderCategories(true); },
 
     openCreateCategorieModal() {
         document.getElementById('categorie-libelle').value = '';
@@ -569,43 +620,63 @@ const app = {
         }
     },
 
-    async renderClients() {
+    async renderClients(append = false) {
         const list = document.getElementById('client-list');
         if (!list) return;
-        this.showSkeleton(list, 'list');
+        if (!append) { this.showSkeleton(list, 'list'); this.listPage = 1; }
         try {
-            const data = await this.api('/clients');
-            this.clients = data.data.clients || [];
-            this.paintClients(this.clients);
+            const params = new URLSearchParams({ page: this.listPage, limit: this.listLimit });
+            const data = await this.api(`/clients?${params.toString()}`);
+            const clients = data.data.items || [];
+            this.clients = clients;
+            const pagination = data.data.pagination || {};
+            const html = clients.map(c => `
+                <div class="list-item" onclick="app.openClientDetail('${this.escapeHtml(c.code_client)}')">
+                    <div class="list-item-info">
+                        <div class="list-item-title">${this.escapeHtml(c.nom_client)}</div>
+                        <div class="list-item-meta">${this.escapeHtml(c.telephone_client || '')} • ${this.escapeHtml(c.adresse_client || '')}</div>
+                    </div>
+                    <button class="list-item-arrow" onclick="event.stopPropagation(); app.startLocationWithClient('${this.escapeHtml(c.code_client)}','${this.escapeHtml(c.nom_client)}')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>`).join('');
+            list.innerHTML = append ? (list.innerHTML + html) : (html || '<div class="empty-state">Aucun client.</div>');
+            this.listHasMore = pagination.has_more || false;
+            const btn = document.getElementById('client-load-more');
+            if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
         } catch (err) {
+            if (!append) list.innerHTML = '<div class="empty-state">Erreur</div>';
             this.toast(err.message, 'error');
         }
     },
 
-    paintClients(clients) {
-        const list = document.getElementById('client-list');
-        if (!list) return;
-        if (!clients.length) { list.innerHTML = '<div class="empty-state">Aucun client.</div>'; return; }
-        list.innerHTML = clients.map(c => `
-            <div class="list-item" onclick="app.openClientDetail('${this.escapeHtml(c.code_client)}')">
-                <div class="list-item-info">
-                    <div class="list-item-title">${this.escapeHtml(c.nom_client)}</div>
-                    <div class="list-item-meta">${this.escapeHtml(c.telephone_client || '')} • ${this.escapeHtml(c.adresse_client || '')}</div>
-                </div>
-                <button class="list-item-arrow" onclick="event.stopPropagation(); app.startLocationWithClient('${this.escapeHtml(c.code_client)}','${this.escapeHtml(c.nom_client)}')">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-            </div>`).join('');
-    },
+    loadMoreClients() { this.listPage++; this.renderClients(true); },
 
     onClientSearch(value) {
         clearTimeout(this.clientSearchTimer);
         this.clientSearchTimer = setTimeout(async () => {
             const q = value.trim();
-            if (!q) { this.paintClients(this.clients || []); return; }
+            const list = document.getElementById('client-list');
+            if (!q) { this.renderClients(); return; }
             try {
                 const data = await this.api(`/clients/search?q=${encodeURIComponent(q)}`);
-                this.paintClients(data.data.clients || []);
+                const clients = data.data.items || [];
+                const pagination = data.data.pagination || {};
+                this.clients = clients;
+                const html = clients.map(c => `
+                    <div class="list-item" onclick="app.openClientDetail('${this.escapeHtml(c.code_client)}')">
+                        <div class="list-item-info">
+                            <div class="list-item-title">${this.escapeHtml(c.nom_client)}</div>
+                            <div class="list-item-meta">${this.escapeHtml(c.telephone_client || '')} • ${this.escapeHtml(c.adresse_client || '')}</div>
+                        </div>
+                        <button class="list-item-arrow" onclick="event.stopPropagation(); app.startLocationWithClient('${this.escapeHtml(c.code_client)}','${this.escapeHtml(c.nom_client)}')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>`).join('');
+                list.innerHTML = html || '<div class="empty-state">Aucun client.</div>';
+                this.listHasMore = pagination.has_more || false;
+                const btn = document.getElementById('client-load-more');
+                if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
             } catch (err) { /* ignore */ }
         }, 300);
     },
@@ -693,44 +764,47 @@ const app = {
         if (m) m.classList.remove('open');
     },
 
-    async renderLocations() {
+    async renderLocations(append = false) {
         const list = document.getElementById('location-list');
         if (!list) return;
-        this.showSkeleton(list, 'list');
+        if (!append) { this.showSkeleton(list, 'list'); this.listPage = 1; }
         const q = this.locationSearch || '';
         let url = '/locations';
         const params = [];
         if (q) params.push('q=' + encodeURIComponent(q));
         if (this.locationFilter === 'retard') params.push('statut=en_cours');
         else if (this.locationFilter) params.push('statut=' + encodeURIComponent(this.locationFilter));
+        params.push('page=' + this.listPage);
+        params.push('limit=' + this.listLimit);
         if (params.length) url += '?' + params.join('&');
         try {
             const data = await this.api(url);
-            let locations = data.data.locations || [];
+            let locations = data.data.items || [];
             if (this.locationFilter === 'retard') {
                 const today = this.getClientDate();
                 locations = locations.filter(l => l.date_retour_prevue_location < today);
             }
-            this.paintLocations(locations);
+            const pagination = data.data.pagination || {};
+            const html = locations.map(l => `
+                <div class="list-item" onclick="app.openLocationDetail('${this.escapeHtml(l.code_location)}')">
+                    <div class="list-item-info">
+                        <div class="list-item-title">${this.escapeHtml(l.nom_client || 'Client')}</div>
+                        <div class="list-item-meta">${this.escapeHtml(this.formatFrenchDate(l.created_at_location))} • ${this.formatMoney(parseFloat(l.montant_location))}</div>
+                    </div>
+                    <span class="list-item-amount">${this.formatMoney(parseFloat(l.reste_location))} reste</span>
+                    ${this.statutBadge(l.statut_location)}
+                </div>`).join('');
+            list.innerHTML = append ? (list.innerHTML + html) : (html || '<div class="empty-state">Aucune location.</div>');
+            this.listHasMore = pagination.has_more || false;
+            const btn = document.getElementById('location-load-more');
+            if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
         } catch (err) {
+            if (!append) list.innerHTML = '<div class="empty-state">Erreur</div>';
             this.toast(err.message, 'error');
         }
     },
 
-    paintLocations(locations) {
-        const list = document.getElementById('location-list');
-        if (!list) return;
-        if (!locations.length) { list.innerHTML = '<div class="empty-state">Aucune location.</div>'; return; }
-        list.innerHTML = locations.map(l => `
-            <div class="list-item" onclick="app.openLocationDetail('${this.escapeHtml(l.code_location)}')">
-                <div class="list-item-info">
-                    <div class="list-item-title">${this.escapeHtml(l.nom_client || 'Client')}</div>
-                    <div class="list-item-meta">${this.escapeHtml(this.formatFrenchDate(l.created_at_location))} • ${this.formatMoney(parseFloat(l.montant_location))}</div>
-                </div>
-                <span class="list-item-amount">${this.formatMoney(parseFloat(l.reste_location))} reste</span>
-                ${this.statutBadge(l.statut_location)}
-            </div>`).join('');
-    },
+    loadMoreLocations() { this.listPage++; this.renderLocations(true); },
 
     setLocationFilter(f) {
         this.locationFilter = f;
@@ -914,7 +988,7 @@ const app = {
         document.getElementById('location-lignes').innerHTML = '';
         try {
             const data = await this.api('/articles');
-            this.articleOptions = (data.data.articles || []).filter(a => a.statut_article === 'actif');
+            this.articleOptions = (data.data.items || []).filter(a => a.statut_article === 'actif');
         } catch (err) {
             this.articleOptions = [];
         }
@@ -948,7 +1022,7 @@ const app = {
             if (!q) { box.innerHTML = ''; return; }
             try {
                 const data = await this.api(`/clients/search?q=${encodeURIComponent(q)}`);
-                const clients = data.data.clients || [];
+                const clients = data.data.items || [];
                 box.innerHTML = clients.length ? clients.map(c => `
                     <div class="list-item" onclick="app.selectLocationClient({code_client:'${this.escapeHtml(c.code_client)}', nom_client:'${this.escapeHtml(c.nom_client)}'})">
                         <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(c.nom_client)}</div><div class="list-item-meta">${this.escapeHtml(c.telephone_client || '')}</div></div>
@@ -1006,6 +1080,10 @@ const app = {
         e.preventDefault();
         const clientCode = document.getElementById('location-client-code').value.trim();
         if (!clientCode) { this.toast('Sélectionnez un client', 'error'); return; }
+        const dateSortie = document.getElementById('location-date-sortie').value;
+        const dateRetour = document.getElementById('location-date-retour').value;
+        if (!dateSortie || !dateRetour) { this.toast('Dates requises', 'error'); return; }
+        if (new Date(dateRetour) <= new Date(dateSortie)) { this.toast('La date de retour doit être après la date de sortie', 'error'); return; }
         const lignes = [];
         let montant = 0;
         document.querySelectorAll('#location-lignes .ligne-row').forEach(row => {
@@ -1013,17 +1091,20 @@ const app = {
             const q = parseInt(row.querySelector('.ligne-qte').value, 10) || 0;
             const p = parseFloat(row.querySelector('.ligne-prix').value) || 0;
             if (articleCode && q > 0) {
+                if (p < 0) { this.toast('Prix invalide pour un article', 'error'); return; }
                 lignes.push({ article_code: articleCode, quantite: q, prix_unitaire: p });
                 montant += q * p;
             }
         });
         if (!lignes.length) { this.toast('Ajoutez au moins un article', 'error'); return; }
+        const avance = parseFloat(document.getElementById('location-avance').value) || 0;
+        if (avance < 0) { this.toast('Avance invalide', 'error'); return; }
         const payload = {
             client_code: clientCode,
-            date_sortie: document.getElementById('location-date-sortie').value,
-            date_retour_prevue: document.getElementById('location-date-retour').value,
+            date_sortie: dateSortie,
+            date_retour_prevue: dateRetour,
             lignes,
-            avance: parseFloat(document.getElementById('location-avance').value) || 0,
+            avance,
         };
         const btn = e.target.querySelector('button[type="submit"]');
         this.setButtonLoading(btn, true);
@@ -1044,14 +1125,18 @@ const app = {
         this.renderHistory();
     },
 
-    async renderHistory() {
+    async renderHistory(append = false) {
         const list = document.getElementById('history-list');
         if (!list) return;
-        this.showSkeleton(list, 'list');
+        if (!append) { this.showSkeleton(list, 'list'); this.listPage = 1; }
         try {
-            const data = await this.api(`/history?filter=${this.historyFilter}&client_date=${this.getClientDate()}`);
+            const params = new URLSearchParams({ filter: this.historyFilter, page: this.listPage, limit: this.listLimit });
+            const clientDate = this.getClientDate();
+            if (clientDate) params.set('client_date', clientDate);
+            const data = await this.api(`/history?${params.toString()}`);
             const items = data.data.items || [];
-            list.innerHTML = items.length ? items.map(item => `
+            const pagination = data.data.pagination || {};
+            const html = items.length ? items.map(item => `
                 <div class="list-item" onclick="app.openLocationDetail('${this.escapeHtml(item.id)}')">
                     <div class="list-item-info">
                         <div class="list-item-title">${this.escapeHtml(item.title)}</div>
@@ -1060,10 +1145,17 @@ const app = {
                     <span class="list-item-amount">${this.formatMoney(item.amount)}</span>
                     ${this.statutBadge(item.statut)}
                 </div>`).join('') : '<div class="empty-state">Aucune location</div>';
+            list.innerHTML = append ? (list.innerHTML + html) : html;
+            this.listHasMore = pagination.has_more || false;
+            const btn = document.getElementById('history-load-more');
+            if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
         } catch (err) {
+            if (!append) list.innerHTML = '<div class="empty-state">Erreur</div>';
             this.toast(err.message, 'error');
         }
     },
+
+    loadMoreHistory() { this.listPage++; this.renderHistory(true); },
 
     async renderReports() {
         const reportSales = document.getElementById('report-sales');
@@ -1109,7 +1201,8 @@ const app = {
         this.showSkeleton(container, 'list');
         try {
             const data = await this.api(`/search?q=${encodeURIComponent(query)}`);
-            const results = data.data.results || [];
+            const results = data.data.items || [];
+            const pagination = data.data.pagination || {};
             if (!results.length) { container.innerHTML = '<div class="empty-state">Aucun résultat</div>'; return; }
             container.innerHTML = results.map(item => `
                 <div class="list-item" onclick="app.openLocationDetail('${this.escapeHtml(item.id)}'); app.closeSearch();">
@@ -1117,10 +1210,15 @@ const app = {
                     <span class="list-item-amount positive">${this.formatMoney(item.amount)}</span>
                     ${this.statutBadge(item.statut)}
                 </div>`).join('');
+            this.listHasMore = pagination.has_more || false;
+            const btn = document.getElementById('search-load-more');
+            if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
         } catch (err) {
             container.innerHTML = '<div class="empty-state">Erreur recherche</div>';
         }
     },
+
+    loadMoreSearch() { this.listPage++; this.performSearch(document.getElementById('search-input').value); },
 
     async renderDevUsers(append = false) {
         const list = document.getElementById('dev-user-list');
@@ -1130,7 +1228,7 @@ const app = {
             const params = new URLSearchParams({ page: this.devUserPage, limit: this.devUserLimit });
             if (this.devUserSearch) params.set('search', this.devUserSearch);
             const data = await this.api(`/dev/users?${params.toString()}`);
-            const users = data.data.users;
+            const users = data.data.items || [];
             const pagination = data.data.pagination || {};
             const html = users.map(u => `
                 <div class="list-item">
@@ -1244,7 +1342,7 @@ const app = {
             const params = new URLSearchParams({ page: this.devShopPage, limit: this.devShopLimit });
             if (this.devShopSearch) params.set('search', this.devShopSearch);
             const data = await this.api(`/dev/shops?${params.toString()}`);
-            const shops = data.data.shops;
+            const shops = data.data.items || [];
             const pagination = data.data.pagination || {};
             const html = shops.map(s => {
                 const statusClass = s.statut_boutique === 'actif' ? 'badge-actif' : 'badge-inactif';
@@ -1470,15 +1568,17 @@ const app = {
         }
     },
 
-    async renderDevForfaits() {
+    async renderDevForfaits(append = false) {
         const list = document.getElementById('dev-forfait-list');
         if (!list) return;
-        this.showSkeleton(list, 'list');
+        if (!append) { this.showSkeleton(list, 'list'); this.listPage = 1; }
         try {
-            const data = await this.api('/dev/forfaits');
-            const forfaits = data.data.forfaits;
+            const params = new URLSearchParams({ page: this.listPage, limit: this.listLimit });
+            const data = await this.api(`/dev/forfaits?${params.toString()}`);
+            const forfaits = data.data.items || [];
+            const pagination = data.data.pagination || {};
             if (!forfaits.length) { list.innerHTML = '<div class="empty-state">Aucun forfait</div>'; return; }
-            list.innerHTML = forfaits.map(f => {
+            const html = forfaits.map(f => {
                 const statusClass = f.statut_forfait === 'actif' ? 'badge-actif' : 'badge-inactif';
                 return `<div class="list-item">
                     <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(f.libelle_forfait)}</div><div class="list-item-meta">${this.escapeHtml(f.code_forfait)} • ${this.escapeHtml(f.duree_forfait)} j</div></div>
@@ -1486,18 +1586,29 @@ const app = {
                     <span class="badge ${statusClass}">${this.escapeHtml(f.statut_forfait)}</span>
                 </div>`;
             }).join('');
-        } catch (err) { this.toast(err.message, 'error'); }
+            list.innerHTML = append ? (list.innerHTML + html) : html;
+            this.listHasMore = pagination.has_more || false;
+            const btn = document.getElementById('dev-forfait-load-more');
+            if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
+        } catch (err) {
+            if (!append) list.innerHTML = '<div class="empty-state">Erreur</div>';
+            this.toast(err.message, 'error');
+        }
     },
 
-    async renderDevAbonnements() {
+    loadMoreDevForfaits() { this.listPage++; this.renderDevForfaits(true); },
+
+    async renderDevAbonnements(append = false) {
         const list = document.getElementById('dev-abonnement-list');
         if (!list) return;
-        this.showSkeleton(list, 'list');
+        if (!append) { this.showSkeleton(list, 'list'); this.listPage = 1; }
         try {
-            const data = await this.api('/dev/abonnements');
-            const abonnements = data.data.abonnements;
+            const params = new URLSearchParams({ page: this.listPage, limit: this.listLimit });
+            const data = await this.api(`/dev/abonnements?${params.toString()}`);
+            const abonnements = data.data.items || [];
+            const pagination = data.data.pagination || {};
             if (!abonnements.length) { list.innerHTML = '<div class="empty-state">Aucun abonnement</div>'; return; }
-            list.innerHTML = abonnements.map(a => {
+            const html = abonnements.map(a => {
                 const statusClass = 'badge-' + this.escapeHtml(a.statut_abonnement);
                 return `<div class="list-item list-item-column">
                     <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(a.boutique_code)}</div><div class="list-item-meta">${this.escapeHtml(a.forfait_code)} • ${this.formatMoney(parseFloat(a.montant_abonnement))}</div></div>
@@ -1512,8 +1623,17 @@ const app = {
                     </div>
                 </div>`;
             }).join('');
-        } catch (err) { this.toast(err.message, 'error'); }
+            list.innerHTML = append ? (list.innerHTML + html) : html;
+            this.listHasMore = pagination.has_more || false;
+            const btn = document.getElementById('dev-abonnement-load-more');
+            if (btn) btn.style.display = this.listHasMore ? 'flex' : 'none';
+        } catch (err) {
+            if (!append) list.innerHTML = '<div class="empty-state">Erreur</div>';
+            this.toast(err.message, 'error');
+        }
     },
+
+    loadMoreDevAbonnements() { this.listPage++; this.renderDevAbonnements(true); },
 
     async setAbonnementStatut(code, statut) {
         const btn = document.querySelector(`button[onclick*="'${code}'"]`);
@@ -1575,6 +1695,16 @@ const app = {
     openConfirm() { const m = document.getElementById('confirm-modal'); if (m) m.classList.add('open'); },
     closeConfirm() { const m = document.getElementById('confirm-modal'); if (m) m.classList.remove('open'); this.pendingDelete = null; },
 
+    handleMenuDownload() {
+        this.closeTopMenu();
+        this.downloadApk();
+    },
+
+    closeTopMenu() {
+        const dropdown = document.getElementById('top-menu-dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+    },
+
     toggleTopMenu() {
         const dropdown = document.getElementById('top-menu-dropdown');
         if (!dropdown) return;
@@ -1583,33 +1713,6 @@ const app = {
             this.closeTopMenu();
         } else {
             dropdown.classList.add('open');
-        }
-    },
-
-    closeTopMenu() {
-        const dropdown = document.getElementById('top-menu-dropdown');
-        if (dropdown) dropdown.classList.remove('open');
-    },
-
-    handleMenuDownload() {
-        this.closeTopMenu();
-        this.downloadApk();
-    },
-    deleteItem(type, id) { this.pendingDelete = { type, id }; this.openConfirm(); },
-    async confirmDelete() {
-        if (!this.pendingDelete) return;
-        const { type, id } = this.pendingDelete;
-        const btn = document.querySelector('#confirm-modal .btn-danger');
-        this.setButtonLoading(btn, true);
-        this.closeConfirm();
-        try {
-            await this.api('/history/delete', { method: 'POST', body: JSON.stringify({ type, id }) });
-            this.renderHistory();
-            this.toast('Opération supprimée', 'success');
-        } catch (err) {
-            this.toast(err.message, 'error');
-        } finally {
-            this.setButtonLoading(btn, false);
         }
     },
 

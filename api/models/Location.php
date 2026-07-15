@@ -183,8 +183,8 @@ class Location
         $montantJour = $pdo->prepare('SELECT COALESCE(SUM(montant_location),0) FROM locations WHERE boutique_code = :b AND date_sortie_location = :d');
         $montantJour->execute(['b' => $boutiqueCode, 'd' => $date]);
 
-        $retards = $pdo->prepare('SELECT COUNT(*) FROM locations WHERE boutique_code = :b AND statut_location = \'en_cours\' AND date_retour_prevue_location < CURDATE()');
-        $retards->execute(['b' => $boutiqueCode]);
+        $retards = $pdo->prepare('SELECT COUNT(*) FROM locations WHERE boutique_code = :b AND statut_location = \'en_cours\' AND date_retour_prevue_location < :d');
+        $retards->execute(['b' => $boutiqueCode, 'd' => $date]);
 
         return [
             'en_cours' => (int) $enCours->fetchColumn(),

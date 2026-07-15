@@ -1,5 +1,20 @@
 <?php
 
+require_once __DIR__ . '/../core/Logger.php';
+
+if (!function_exists('getallheaders')) {
+    function getallheaders(): array {
+        $headers = [];
+        foreach ($_SERVER as $name => $value) {
+            if (str_starts_with($name, 'HTTP_')) {
+                $key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+                $headers[$key] = $value;
+            }
+        }
+        return $headers;
+    }
+}
+
 abstract class Controller
 {
     protected function input(string $key, $default = null)
@@ -30,24 +45,27 @@ abstract class Controller
         $headers = getallheaders();
         $token = $headers['Authorization'] ?? $headers['authorization'] ?? null;
         if (!$token && isset($_COOKIE['nafa_user'])) {
-            $userData = json_decode(base64_decode($_COOKIE['nafa_user']), true);
+            $userData = Auth::verifyCookieData($_COOKIE['nafa_user']);
             if ($userData && isset($userData['telephone_user'])) {
                 return $userData;
             }
         }
         if (!$token) {
+            Logger::auth('Auth failed: no token provided');
             Response::error('Non autorisé', [], 401);
         }
         $token = preg_replace('/^Bearer\s+/i', '', $token);
-        $parts = explode(':', base64_decode($token));
-        if (count($parts) !== 2) {
-            Response::error('Token invalide', [], 401);
+        $decoded = Auth::validateToken($token);
+        if (!$decoded) {
+            Logger::auth('Auth failed: invalid token');
+            Response::error('Token invalide ou expiré', [], 401);
         }
-        [$phone] = $parts;
-        $user = User::findByPhone($phone);
+        $user = User::findByPhone($decoded['phone']);
         if (!$user) {
+            Logger::auth('Auth failed: user not found', ['phone' => $decoded['phone']]);
             Response::error('Utilisateur introuvable', [], 401);
         }
+        Logger::auth('Auth success', ['user_code' => $user['code_user']]);
         return $user;
     }
 
@@ -73,5 +91,41 @@ abstract class Controller
         }
 
         return $user;
+    }
+
+    protected function requireCsrf(): void
+    {
+        $headers = getallheaders();
+        $headerToken = $headers['X-CSRF-Token'] ?? $headers['x-csrf-token'] ?? null;
+        $cookieToken = $_COOKIE['XSRF-TOKEN'] ?? $_COOKIE['csrf_token'] ?? null;
+        if (!$headerToken || !$cookieToken || !hash_equals($cookieToken, $headerToken)) {
+            Logger::warning('CSRF validation failed', [
+                'has_header' => !empty($headerToken),
+                'has_cookie' => !empty($cookieToken),
+            ]);
+            Response::error('Requête invalide (CSRF)', [], 403);
+        }
+    }
+
+    protected function paginationParams(): array
+    {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $limit = min(100, max(1, (int)($_GET['limit'] ?? 20)));
+        return ['page' => $page, 'limit' => $limit, 'offset' => ($page - 1) * $limit];
+    }
+
+    protected function paginatedResponse(array $items, int $total, array $extra = []): void
+    {
+        $params = $this->paginationParams();
+        $hasMore = ($params['page'] * $params['limit']) < $total;
+        Response::success('', array_merge($extra, [
+            'items' => $items,
+            'pagination' => [
+                'page' => $params['page'],
+                'limit' => $params['limit'],
+                'total' => $total,
+                'has_more' => $hasMore,
+            ],
+        ]));
     }
 }

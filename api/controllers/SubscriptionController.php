@@ -8,11 +8,15 @@ class SubscriptionController extends Controller
     {
         $this->requireAuth();
         $forfaits = Forfait::getActifs();
-        Response::success('Forfaits disponibles', ['forfaits' => $forfaits]);
+        $total = count($forfaits);
+        $params = $this->paginationParams();
+        $items = array_slice($forfaits, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 
     public function subscribe(): void
     {
+        $this->requireCsrf();
         $user = $this->requireAuth();
 
         if (($user['role_user'] ?? '') === 'developpeur') {

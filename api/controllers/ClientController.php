@@ -11,7 +11,11 @@ class ClientController extends Controller
         if (!$shop) {
             Response::error('Boutique introuvable', [], 404);
         }
-        Response::success('Clients', ['clients' => Client::allByBoutique($shop['code_boutique'])]);
+        $clients = Client::allByBoutique($shop['code_boutique']);
+        $total = count($clients);
+        $params = $this->paginationParams();
+        $items = array_slice($clients, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 
     public function search(): void
@@ -25,11 +29,16 @@ class ClientController extends Controller
         if (!$q) {
             Response::success('Résultats', ['clients' => []]);
         }
-        Response::success('Résultats', ['clients' => Client::search($shop['code_boutique'], $q)]);
+        $clients = Client::search($shop['code_boutique'], $q);
+        $total = count($clients);
+        $params = $this->paginationParams();
+        $items = array_slice($clients, $params['offset'], $params['limit']);
+        $this->paginatedResponse($items, $total);
     }
 
     public function store(): void
     {
+        $this->requireCsrf();
         $user = $this->requireActiveSubscription();
         $shop = Shop::findByUserCode($user['code_user']);
         if (!$shop) {

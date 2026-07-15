@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../config/database.php';
+
 class Auth
 {
     public static function getPhoneFromHeader(): ?string
@@ -15,9 +17,78 @@ class Auth
         $token = $headers['Authorization'] ?? $headers['authorization'] ?? null;
         if (!$token) return null;
         $token = preg_replace('/^Bearer\s+/i', '', $token);
-        $parts = explode(':', base64_decode($token));
+        return self::validateToken($token);
+    }
+
+    public static function generateToken(string $phone): string
+    {
+        $config = require __DIR__ . '/../config/database.php';
+        $secret = $config['jwt_secret'] ?? 'LOKALEX_SECRET';
+        $exp = time() + 86400 * 30;
+        $payload = $phone . ':' . $exp;
+        $sig = hash_hmac('sha256', $payload, $secret);
+        $data = $payload . ':' . $sig;
+        return bin2hex($data);
+    }
+
+    public static function validateToken(string $token): ?array
+    {
+        $config = require __DIR__ . '/../config/database.php';
+        $secret = $config['jwt_secret'] ?? 'LOKALEX_SECRET';
+        $decoded = hex2bin($token);
+        if ($decoded === false) return null;
+        $parts = explode(':', $decoded);
+        if (count($parts) !== 3) return null;
+        [$phone, $exp, $sig] = $parts;
+        $expectedSig = hash_hmac('sha256', $phone . ':' . $exp, $secret);
+        if (!hash_equals($expectedSig, $sig)) return null;
+        if (time() > (int) $exp) return null;
+        return ['phone' => $phone, 'password' => ''];
+    }
+
+    public static function signCookieData(array $data): string
+    {
+        $config = require __DIR__ . '/../config/database.php';
+        $secret = $config['jwt_secret'] ?? 'LOKALEX_SECRET';
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+        $sig = hash_hmac('sha256', $json, $secret);
+        return base64_encode($json . ':' . $sig);
+    }
+
+    public static function verifyCookieData(string $signed): ?array
+    {
+        $config = require __DIR__ . '/../config/database.php';
+        $secret = $config['jwt_secret'] ?? 'LOKALEX_SECRET';
+        $decoded = base64_decode($signed, true);
+        if ($decoded === false) return null;
+        $parts = explode(':', $decoded, 2);
         if (count($parts) !== 2) return null;
-        [$phone, $password] = $parts;
-        return ['phone' => $phone, 'password' => $password];
+        [$json, $sig] = $parts;
+        $expectedSig = hash_hmac('sha256', $json, $secret);
+        if (!hash_equals($expectedSig, $sig)) return null;
+        $data = json_decode($json, true);
+        return is_array($data) ? $data : null;
+    }
+
+    public static function generateCsrfToken(): string
+    {
+        $config = require __DIR__ . '/../config/database.php';
+        $secret = $config['csrf_secret'] ?? 'LOKALEX_CSRF';
+        $random = bin2hex(random_bytes(32));
+        $sig = hash_hmac('sha256', $random, $secret);
+        return base64_encode($random . ':' . $sig);
+    }
+
+    public static function validateCsrfToken(string $token): bool
+    {
+        $config = require __DIR__ . '/../config/database.php';
+        $secret = $config['csrf_secret'] ?? 'LOKALEX_CSRF';
+        $decoded = base64_decode($token, true);
+        if ($decoded === false) return false;
+        $parts = explode(':', $decoded);
+        if (count($parts) !== 2) return false;
+        [$random, $sig] = $parts;
+        $expectedSig = hash_hmac('sha256', $random, $secret);
+        return hash_equals($expectedSig, $sig);
     }
 }

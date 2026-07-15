@@ -1,0 +1,17 @@
+[2026-07-15 17:12:57] [AUTH] [GET /lokalex/api/dev/users?page=1&limit=20] [::1] Auth success {"user_code":"USRDEV001"}
+[2026-07-15 17:12:59] [AUTH] [GET /lokalex/api/dev/shops?page=1&limit=20] [::1] Auth success {"user_code":"USRDEV001"}
+[2026-07-15 17:13:04] [AUTH] [GET /lokalex/api/dev/shop-detail?code=BTELOKA01&tx_page=1&tx_limit=15] [::1] Auth success {"user_code":"USRDEV001"}
+[2026-07-15 17:13:04] [AUTH] [GET /lokalex/api/dev/forfaits] [::1] Auth success {"user_code":"USRDEV001"}
+[2026-07-15 17:14:03] [AUTH] [POST /lokalex/api/auth/login] [::1] Login success {"user_code":"USRVEND001","phone":"770000002"}
+[2026-07-15 17:14:03] [AUTH] [GET /lokalex/api/dashboard?client_date=2026-07-15] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:14:07] [AUTH] [GET /lokalex/api/dashboard?client_date=2026-07-15] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:14:12] [AUTH] [GET /lokalex/api/articles] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:22:00] [AUTH] [GET /lokalex/api/dashboard?client_date=2026-07-15] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:22:04] [AUTH] [GET /lokalex/api/articles] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:22:10] [AUTH] [GET /lokalex/api/clients/search?q=z] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:22:12] [AUTH] [GET /lokalex/api/clients/search?q=c] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:22:14] [AUTH] [GET /lokalex/api/clients/search?q=a] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:22:20] [AUTH] [GET /lokalex/api/clients/search?q=c] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:23:00] [AUTH] [POST /lokalex/api/locations] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:23:00] [AUTH] [GET /lokalex/api/dashboard?client_date=2026-07-15] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-15 17:23:08] [AUTH] [GET /lokalex/api/reports?period=day&client_date=2026-07-15] [::1] Auth success {"user_code":"USRVEND001"}
