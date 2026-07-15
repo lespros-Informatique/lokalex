@@ -166,11 +166,38 @@ html, body {
     margin-top: 4px;
 }
 
-.header-user {
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.header-greeting {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.header-bienvenue {
     font-size: 13px;
-    color: var(--text);
-    margin-top: 6px;
+    color: var(--text-light);
     font-weight: 500;
+    margin: 0;
+}
+
+.header-user {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 600;
+    margin: 0;
+}
+
+.header-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: block;
 }
 
 .header-row {

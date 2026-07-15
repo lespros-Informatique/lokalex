@@ -55,9 +55,14 @@
         <!-- DASHBOARD PAGE -->
         <div id="page-dashboard" class="page">
             <div class="header">
-                <img src="images/lokalex-icon.png" alt="LOKALEX" class="header-logo">
+                <div class="header-top">
+                    <img src="images/lokalex-icon.png" alt="LOKALEX" class="header-logo">
+                    <div class="header-greeting">
+                        <p class="header-bienvenue">Bienvenue</p>
+                        <p class="header-user" id="dash-user-name"></p>
+                    </div>
+                </div>
                 <p class="header-subtitle" id="dash-date"></p>
-                <p class="header-user" id="dash-user-name"></p>
             </div>
             <div class="metrics-grid">
                 <div class="metric-card"><span class="metric-label">En cours</span><span class="metric-value" id="dash-en-cours">0</span></div>
@@ -481,7 +486,7 @@
         </nav>
 
         <button id="top-menu-btn" class="top-menu-btn" onclick="app.toggleTopMenu()" style="display:none;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="18" r="1.5"></circle></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
         <div id="top-menu-dropdown" class="top-menu-dropdown">
             <button class="top-menu-item" onclick="app.handleMenuDownload()">
