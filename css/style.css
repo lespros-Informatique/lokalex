@@ -375,6 +375,11 @@ html, body {
     gap: 10px;
 }
 
+#dashboard-recent .list-container {
+    padding-left: 0;
+    padding-right: 0;
+}
+
 .list-item {
     background: var(--white);
     border-radius: 16px;
