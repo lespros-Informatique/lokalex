@@ -43,6 +43,17 @@ class Location
             }
             LigneLocation::createMany($data['code_location'], $pdoLignes);
 
+            if ((float) ($data['avance_location'] ?? 0) > 0) {
+                Paiement::create([
+                    'code_paiement' => 'PAI' . time() . mt_rand(100, 999),
+                    'location_code' => $data['code_location'],
+                    'montant_paiement' => $data['avance_location'],
+                    'mode_paiement' => 'especes',
+                    'reference_paiement' => null,
+                    'created_at_paiement' => $data['created_at_location'],
+                ]);
+            }
+
             $pdo->commit();
         } catch (\Throwable $e) {
             $pdo->rollBack();

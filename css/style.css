@@ -1,4 +1,4 @@
-:root {
+/* :root {
     --primary: #16A34A;
     --primary-dark: #166534;
     --primary-light: #DCFCE7;
@@ -29,8 +29,64 @@
     --white-60: rgba(255, 255, 255, 0.6);
     --text-blue: #1E3A8A;
     --text-gray: #4B5563;
-}
+} */
 
+:root {
+    /* Couleurs principales */
+    --primary: #1E3A5F;
+    --primary-dark: #152C47;
+    --primary-light: #EAF1F8;
+
+    /* Couleur d'accent */
+    --secondary: #E67E22;
+    --secondary-dark: #C96A14;
+    --secondary-light: #FDF1E4;
+
+    /* Neutres */
+    --white: #FFFFFF;
+    --bg: #F8FAFC;
+    --bg-light: #F1F5F9;
+
+    /* Textes */
+    --text: #1F2937;
+    --text-light: #6B7280;
+    --text-gray: #4B5563;
+    --text-blue: #1E3A5F;
+
+    /* Bordures */
+    --border: #E5E7EB;
+    --border-light: #D1D5DB;
+
+    /* États */
+    --success: #16A34A;
+    --success-light: #DCFCE7;
+    --text-success: #15803D;
+
+    --warning: #F59E0B;
+    --warning-light: #FEF3C7;
+    --text-warning: #B45309;
+
+    --danger: #DC2626;
+    --danger-dark: #B91C1C;
+    --danger-light: #FEE2E2;
+
+    --info: #2563EB;
+    --info-light: #DBEAFE;
+    --text-info: #1D4ED8;
+
+    /* Ombres */
+    --shadow: rgba(0, 0, 0, 0.06);
+    --shadow-primary: rgba(30, 58, 95, 0.25);
+    --shadow-primary-dark: rgba(21, 44, 71, 0.30);
+    --shadow-primary-strong: rgba(30, 58, 95, 0.35);
+    --shadow-secondary: rgba(230, 126, 34, 0.25);
+    --shadow-danger: rgba(220, 38, 38, 0.25);
+
+    /* Divers */
+    --overlay: rgba(0, 0, 0, 0.45);
+    --white-30: rgba(255, 255, 255, 0.3);
+    --white-60: rgba(255, 255, 255, 0.6);
+}
 * {
     margin: 0;
     padding: 0;
