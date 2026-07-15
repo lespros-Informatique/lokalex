@@ -142,6 +142,10 @@ class LocationController extends Controller
             Response::error('Location introuvable', [], 404);
         }
 
+        if ((float) ($location['reste_location'] ?? 0) > 0) {
+            Response::error('Impossible de faire un retour tant que le reste à payer est supérieur à 0', [], 400);
+        }
+
         $lignes = $this->input('lignes', []);
         if (!is_array($lignes) || count($lignes) === 0) {
             Response::error('Indiquez les quantités retournées');

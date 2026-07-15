@@ -769,6 +769,7 @@ const app = {
                 <span class="list-item-amount positive">+${this.formatMoney(parseFloat(p.montant_paiement))}</span>
             </div>`).join('') : '<div class="empty-state">Aucun paiement</div>';
         const terminee = l.statut_location === 'terminee';
+        const hasReste = parseFloat(l.reste_location || 0) > 0;
         sheet.innerHTML = `
             <div class="modal-header"><h3>Location</h3><button class="modal-close" onclick="app.closeLocationDetail()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
             <div class="modal-body">
@@ -792,7 +793,7 @@ const app = {
                 <div class="detail-section"><h4 class="detail-title">Paiements</h4><div class="detail-transactions-scroll">${paiementsHtml}</div></div>
                 <div class="detail-actions">
                     ${terminee ? '' : `<button class="btn btn-primary" onclick="app.openPaiement('${this.escapeHtml(l.code_location)}')">+ Paiement</button>`}
-                    ${terminee ? '' : `<button class="btn btn-secondary" onclick="app.openRetour('${this.escapeHtml(l.code_location)}')">Retour</button>`}
+                    ${terminee || hasReste ? '' : `<button class="btn btn-secondary" onclick="app.openRetour('${this.escapeHtml(l.code_location)}')">Retour</button>`}
                 </div>
             </div>`;
     },
@@ -805,6 +806,8 @@ const app = {
     openRetour(code) {
         const d = this.currentLocation;
         if (!d) return;
+        const reste = parseFloat(d.reste_location || 0);
+        if (reste > 0) { this.toast('Impossible de faire un retour tant que le reste à payer est supérieur à 0', 'error'); return; }
         const lignes = d.lignes || [];
         document.getElementById('retour-code').value = code;
         document.getElementById('retour-lignes').innerHTML = lignes.map((ll, i) => `
@@ -823,6 +826,8 @@ const app = {
     async handleRetour(e) {
         e.preventDefault();
         const code = document.getElementById('retour-code').value;
+        const reste = parseFloat(this.currentLocation?.reste_location || 0);
+        if (reste > 0) { this.toast('Impossible de faire un retour tant que le reste à payer est supérieur à 0', 'error'); return; }
         const inputs = document.querySelectorAll('#retour-lignes .retour-qte');
         const lignes = [];
         inputs.forEach(inp => {
