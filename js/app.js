@@ -342,6 +342,8 @@ const app = {
         }
         try {
             const data = await this.api(`/dashboard?client_date=${this.getClientDate()}`);
+            const nameEl = document.getElementById('dash-user-name');
+            if (nameEl) nameEl.textContent = this.currentUser ? this.currentUser.nom_user : '';
             if (isDev) {
                 const metricsGrid = document.querySelector('#page-dashboard .metrics-grid');
                 if (metricsGrid) metricsGrid.style.display = 'none';
@@ -370,8 +372,6 @@ const app = {
                 if (clients) clients.textContent = data.data.clients ?? 0;
                 if (retards) retards.textContent = data.data.retards ?? 0;
             }
-            const nameEl = document.getElementById('dash-user-name');
-            if (nameEl) nameEl.textContent = this.currentUser ? this.currentUser.nom_user : '';
             if (recentList) this.renderRecentLocations(data.data.recent);
         } catch (err) {
             this.toast(err.message, 'error');
