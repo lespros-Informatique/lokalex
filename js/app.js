@@ -785,7 +785,7 @@ const app = {
                         <div class="detail-item"><span>Montant</span><strong>${this.formatMoney(parseFloat(l.montant_location))}</strong></div>
                         <div class="detail-item"><span>Avance</span><strong>${this.formatMoney(parseFloat(l.avance_location))}</strong></div>
                         <div class="detail-item"><span>Reste</span><strong>${this.formatMoney(parseFloat(l.reste_location))}</strong></div>
-                        <div class="detail-item"><span>Statut</span><strong>${l.statut_location}</strong></div>
+                        <div class="detail-item"><span>Statut</span>${this.statutBadge(l.statut_location)}</div>
                     </div>
                 </div>
                 <div class="detail-section"><h4 class="detail-title">Articles</h4><div class="detail-transactions-scroll">${lignesHtml}</div></div>
@@ -862,6 +862,8 @@ const app = {
         const code = document.getElementById('paiement-code').value;
         const montant = parseFloat(document.getElementById('paiement-montant').value);
         if (!montant || montant <= 0) { this.toast('Montant invalide', 'error'); return; }
+        const reste = parseFloat(this.currentLocation?.reste_location || 0);
+        if (montant > reste) { this.toast('Le montant ne peut pas dépasser le reste à payer (' + this.formatMoney(reste) + ')', 'error'); return; }
         const payload = {
             code,
             montant,
