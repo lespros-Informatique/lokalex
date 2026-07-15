@@ -460,7 +460,24 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 14px;
         padding: 0;
+        margin-bottom: 14px;
+    }
+
+    .metrics-row {
         margin-bottom: 24px;
+    }
+
+    .metrics-row .metric-card {
+        grid-column: span 2;
+    }
+
+    .metric-retard {
+        border: 1px solid var(--danger-light);
+        background: var(--danger-light);
+    }
+
+    .metric-retard .metric-value {
+        color: var(--danger);
     }
 
     .metric-card {
@@ -534,6 +551,10 @@
     .form-page {
         padding: 0;
         max-width: 600px;
+    }
+
+    #page-nouvelle-location .form-page {
+        max-width: none;
     }
 
     .input-group {
