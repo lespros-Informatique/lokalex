@@ -95,10 +95,8 @@ const app = {
             const isDev = this.currentUser && this.currentUser.role_user === 'developpeur';
             document.querySelectorAll('.dev-only').forEach(el => el.style.display = isDev ? '' : 'none');
             document.querySelectorAll('.dev-hidden').forEach(el => el.style.display = isDev ? 'none' : '');
-            const logoutBtn = document.getElementById('logout-top');
-            if (logoutBtn) logoutBtn.style.display = isDev ? 'flex' : 'flex';
-            const downloadBtn = document.getElementById('download-top');
-            if (downloadBtn) downloadBtn.style.display = isDev ? 'flex' : 'none';
+            const menuBtn = document.getElementById('top-menu-btn');
+            if (menuBtn) menuBtn.style.display = isDev ? 'flex' : 'none';
             this.navigate('dashboard');
         } else {
             this.navigate('login');
@@ -106,6 +104,13 @@ const app = {
     },
 
     setupEventListeners() {
+        document.addEventListener('click', (e) => {
+            const btn = document.getElementById('top-menu-btn');
+            const dropdown = document.getElementById('top-menu-dropdown');
+            if (btn && dropdown && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+                this.closeTopMenu();
+            }
+        });
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -134,10 +139,8 @@ const app = {
         if (fab) fab.classList.remove('open');
 
         const isDev = this.currentUser && this.currentUser.role_user === 'developpeur';
-        const logoutBtn = document.getElementById('logout-top');
-        if (logoutBtn) logoutBtn.style.display = loggedIn ? 'flex' : 'none';
-        const downloadBtn = document.getElementById('download-top');
-        if (downloadBtn) downloadBtn.style.display = (loggedIn && isDev) ? 'flex' : 'none';
+        const menuBtn = document.getElementById('top-menu-btn');
+        if (menuBtn) menuBtn.style.display = loggedIn ? 'flex' : 'none';
 
         this.closeCreateUserModal();
         this.closeCreateShopModal();
@@ -299,8 +302,9 @@ const app = {
     },
 
     async logout() {
-        const logoutBtn = document.getElementById('logout-top');
-        this.setButtonLoading(logoutBtn, true);
+        this.closeTopMenu();
+        const menuBtn = document.getElementById('top-menu-btn');
+        this.setButtonLoading(menuBtn, true);
         try {
             await this.api('/auth/logout', { method: 'POST' });
         } catch (e) { /* ignore */ }
@@ -308,11 +312,9 @@ const app = {
             this.currentUser = null;
             this.currentShop = null;
             localStorage.removeItem('lokalex_session');
-            const lb = document.getElementById('logout-top'); if (lb) lb.style.display = 'none';
-            const db = document.getElementById('download-top'); if (db) db.style.display = 'none';
             this.navigate('login');
             this.toast('Déconnexion réussie', 'success');
-            this.setButtonLoading(logoutBtn, false);
+            this.setButtonLoading(menuBtn, false);
         }
     },
 
@@ -1563,6 +1565,27 @@ const app = {
 
     openConfirm() { const m = document.getElementById('confirm-modal'); if (m) m.classList.add('open'); },
     closeConfirm() { const m = document.getElementById('confirm-modal'); if (m) m.classList.remove('open'); this.pendingDelete = null; },
+
+    toggleTopMenu() {
+        const dropdown = document.getElementById('top-menu-dropdown');
+        if (!dropdown) return;
+        const isOpen = dropdown.classList.contains('open');
+        if (isOpen) {
+            this.closeTopMenu();
+        } else {
+            dropdown.classList.add('open');
+        }
+    },
+
+    closeTopMenu() {
+        const dropdown = document.getElementById('top-menu-dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+    },
+
+    handleMenuDownload() {
+        this.closeTopMenu();
+        this.downloadApk();
+    },
     deleteItem(type, id) { this.pendingDelete = { type, id }; this.openConfirm(); },
     async confirmDelete() {
         if (!this.pendingDelete) return;

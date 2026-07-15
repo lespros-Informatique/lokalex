@@ -1031,7 +1031,7 @@ html, body {
     box-shadow: 0 4px 12px var(--shadow-danger);
 }
 
-.logout-top {
+.top-menu-btn {
     position: fixed;
     top: 16px;
     right: 16px;
@@ -1039,7 +1039,7 @@ html, body {
     height: 44px;
     border-radius: 12px;
     background: var(--white);
-    border: 2px solid var(--border-light);
+    border: 1.5px solid var(--border);
     color: var(--text-gray);
     display: flex;
     align-items: center;
@@ -1049,30 +1049,60 @@ html, body {
     box-shadow: 0 2px 8px var(--shadow);
 }
 
-.logout-top:active {
+.top-menu-btn:active {
     transform: scale(0.95);
 }
 
-.download-top {
+.top-menu-dropdown {
     position: fixed;
-    top: 16px;
-    right: 68px;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    top: 68px;
+    right: 16px;
     background: var(--white);
-    border: 1.5px solid var(--border);
-    color: var(--primary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px var(--shadow);
+    z-index: 160;
+    display: none;
+    min-width: 220px;
+    padding: 8px;
+    animation: fadeIn 0.15s ease;
+}
+
+.top-menu-dropdown.open {
+    display: block;
+}
+
+.top-menu-item {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    background: none;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
-    z-index: 150;
-    box-shadow: 0 2px 8px var(--shadow);
+    border-radius: 12px;
+    text-align: left;
 }
 
-.download-top:active {
-    transform: scale(0.95);
+.top-menu-item:active {
+    background: var(--bg-light);
+}
+
+.top-menu-item svg {
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+.top-menu-logout {
+    color: var(--danger);
+}
+
+.top-menu-logout svg {
+    color: var(--danger);
 }
 
 .download-hero {
