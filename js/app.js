@@ -333,31 +333,40 @@ const app = {
         if (!isDev && !this.currentShop) return;
         const metricsGrid = document.querySelector('#page-dashboard .metrics-grid');
         const recentList = document.getElementById('recent-list');
-        if (recentList && !isDev) this.showSkeleton(recentList, 'list');
-        if (metricsGrid && !isDev) {
-            ['dash-en-cours', 'dash-retours', 'dash-montant', 'dash-clients', 'dash-retards'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = '';
-            });
+        const devSection = document.getElementById('dashboard-dev');
+        if (isDev) {
+            if (metricsGrid) metricsGrid.style.display = 'none';
+            if (devSection) {
+                devSection.style.display = '';
+                const devMetrics = devSection.querySelector('.metrics-grid');
+                if (devMetrics) devMetrics.innerHTML = `
+                    <div class="metric-card"><span class="metric-label">Boutiques</span><span class="metric-value">...</span></div>
+                    <div class="metric-card"><span class="metric-label">Vendeurs</span><span class="metric-value">...</span></div>
+                    <div class="metric-card metric-expenses metric-card-full"><span class="metric-label">Abonnements expirés</span><span class="metric-value">...</span></div>`;
+            }
+            if (recentList) recentList.style.display = 'none';
+        } else {
+            if (recentList) this.showSkeleton(recentList, 'list');
+            if (metricsGrid) {
+                ['dash-en-cours', 'dash-retours', 'dash-montant', 'dash-clients', 'dash-retards'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '';
+                });
+            }
         }
         try {
             const data = await this.api(`/dashboard?client_date=${this.getClientDate()}`);
             const nameEl = document.getElementById('dash-user-name');
             if (nameEl) nameEl.textContent = this.currentUser ? this.currentUser.nom_user : '';
             if (isDev) {
-                const metricsGrid = document.querySelector('#page-dashboard .metrics-grid');
-                if (metricsGrid) metricsGrid.style.display = 'none';
                 const s = data.data.stats || {};
-                const devSection = document.getElementById('dashboard-dev');
                 if (devSection) {
-                    devSection.style.display = '';
-                    devSection.querySelector('.metrics-grid').innerHTML = `
+                    const devMetrics = devSection.querySelector('.metrics-grid');
+                    if (devMetrics) devMetrics.innerHTML = `
                         <div class="metric-card"><span class="metric-label">Boutiques</span><span class="metric-value">${s.boutiques ?? 0}</span></div>
                         <div class="metric-card"><span class="metric-label">Vendeurs</span><span class="metric-value">${s.vendeurs ?? 0}</span></div>
                         <div class="metric-card metric-expenses metric-card-full"><span class="metric-label">Abonnements expirés</span><span class="metric-value">${s.abonnements_expires ?? 0}</span></div>`;
                 }
-                const dashboardRecent = document.getElementById('dashboard-recent');
-                if (dashboardRecent) dashboardRecent.style.display = 'none';
                 return;
             }
             if (metricsGrid) {
