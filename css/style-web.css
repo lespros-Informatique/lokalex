@@ -463,6 +463,15 @@
         margin-bottom: 14px;
     }
 
+    .metrics-dashboard {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .metrics-dashboard .metric-card:nth-child(4),
+    .metrics-dashboard .metric-card:nth-child(5) {
+        grid-column: span 1;
+    }
+
     .metrics-row {
         margin-bottom: 24px;
     }
@@ -1751,6 +1760,15 @@
     .metrics-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 18px;
+    }
+
+    .metrics-dashboard {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .metrics-dashboard .metric-card:nth-child(4),
+    .metrics-dashboard .metric-card:nth-child(5) {
+        grid-column: span 1;
     }
 
     .metric-card {

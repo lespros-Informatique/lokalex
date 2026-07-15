@@ -362,6 +362,10 @@ html, body {
     padding: 16px 20px;
 }
 
+.metrics-dashboard .metric-card:last-child {
+    grid-column: 1 / -1;
+}
+
 .metric-card {
     background: var(--white);
     border-radius: 20px;
