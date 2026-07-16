@@ -212,8 +212,12 @@ class LocationController extends Controller
         $statutRetour = ($totalRendu >= $totalLivre) ? 'termine' : 'partiel';
         $retourCode = 'RET' . time() . mt_rand(100, 999);
 
-        $location = Location::retour($code, $lignesValidees, $retourCode, $shop['code_boutique'], $user['code_user'], $statutRetour);
-        Response::success('Retour enregistré', ['location' => $location, 'retour_code' => $retourCode, 'total_restitution' => $totalRestitution]);
+        try {
+            $location = Location::retour($code, $lignesValidees, $retourCode, $shop['code_boutique'], $user['code_user'], $statutRetour);
+            Response::success('Retour enregistré', ['location' => $location, 'retour_code' => $retourCode, 'total_restitution' => $totalRestitution]);
+        } catch (\Throwable $e) {
+            Response::error('Retour invalide : ' . $e->getMessage(), ['trace' => $e->getTraceAsString()], 400);
+        }
     }
 
     public function payerRestitution(): void

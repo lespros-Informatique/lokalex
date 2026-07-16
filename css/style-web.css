@@ -932,6 +932,9 @@
         border: 1px solid var(--border);
         box-shadow: 0 25px 60px rgba(30, 58, 95, 0.2);
         animation: fadeIn 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .modal-header {
@@ -941,6 +944,7 @@
         padding: 16px 20px;
         background: var(--white);
         border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
     }
 
     .modal-header h3 {
@@ -970,6 +974,7 @@
         flex: 1;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        padding: 20px;
     }
 
     .confirm-sheet {
