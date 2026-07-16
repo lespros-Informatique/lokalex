@@ -33,7 +33,7 @@
                 </button>
                 <button class="nav-item dev-hidden" onclick="app.navigate('articles')" data-page="articles">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    <span>Articles</span>
+                    <span>Matériel </span>
                 </button>
                 <button class="nav-item dev-hidden" onclick="app.navigate('clients')" data-page="clients">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -193,7 +193,7 @@
             <div class="header">
                 <div class="header-row">
                     <div>
-                        <h2>Articles</h2>
+                        <h2>Matériel</h2>
                         <p class="header-subtitle">Matériel disponible</p>
                     </div>
                     <button class="btn btn-primary" onclick="app.openCreateArticleModal()">Nouveau</button>
@@ -229,7 +229,7 @@
                 <div class="header-row">
                     <div>
                         <h2>Catégories</h2>
-                        <p class="header-subtitle">Catégories d'articles</p>
+                        <p class="header-subtitle">Catégories de matériel</p>
                     </div>
                     <button class="btn btn-primary" onclick="app.openCreateCategorieModal()">Nouveau</button>
                 </div>
@@ -259,7 +259,7 @@
                 <div class="input-group">
                     <label>Lignes de location</label>
                     <div id="location-lignes"></div>
-                    <button type="button" class="btn btn-secondary btn-full" onclick="app.addLocationLigne()">+ Ajouter un article</button>
+                    <button type="button" class="btn btn-secondary btn-full" onclick="app.addLocationLigne()">+ Ajouter un matériel</button>
                 </div>
                 <div class="input-group">
                     <label for="location-date-sortie">Date de sortie</label>
@@ -410,7 +410,7 @@
         <div id="create-article-modal" class="modal-overlay" onclick="if(event.target===this)app.closeCreateArticleModal()">
             <div class="modal-sheet">
                 <div class="modal-header">
-                    <h3 id="article-modal-title">Nouvel article</h3>
+                    <h3 id="article-modal-title">Nouveau matériel</h3>
                     <button class="modal-close" onclick="app.closeCreateArticleModal()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
                 </div>
                 <div class="modal-body">
@@ -611,7 +611,7 @@
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
             <div class="fab-menu" id="fab-menu">
-                <button class="fab-menu-item" onclick="app.navigate('articles')"><span class="fab-menu-dot" style="background:#16A34A"></span>Articles</button>
+                <button class="fab-menu-item" onclick="app.navigate('articles')"><span class="fab-menu-dot" style="background:#16A34A"></span>Matériel </button>
                 <button class="fab-menu-item" onclick="app.navigate('nouvelle-location')"><span class="fab-menu-dot" style="background:#2563EB"></span>Nouvelle location</button>
                 <button class="fab-menu-item" onclick="app.navigate('clients')"><span class="fab-menu-dot" style="background:#9333EA"></span>Clients</button>
             </div>

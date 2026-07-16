@@ -153,7 +153,7 @@ const app = {
 
         const titles = {
             dashboard: 'Accueil',
-            articles: 'Articles',
+            articles: 'Matériel',
             clients: 'Clients',
             categories: 'Catégories',
             locations: 'Locations',
@@ -540,7 +540,7 @@ const app = {
         document.getElementById('article-categorie').value = '';
         document.getElementById('article-quantite').value = '';
         document.getElementById('article-prix').value = '';
-        document.getElementById('article-modal-title').textContent = 'Nouvel article';
+        document.getElementById('article-modal-title').textContent = 'Nouveau matériel';
         document.getElementById('article-submit').textContent = 'Ajouter';
         document.getElementById('create-article-modal').classList.add('open');
     },
@@ -1010,7 +1010,7 @@ const app = {
                         <div class="detail-item"><span>Avance</span><strong>${this.formatMoney(parseFloat(l.avance_location))}</strong></div>
                         <div class="detail-item"><span>Reste</span><strong>${this.formatMoney(parseFloat(l.reste_location))}</strong></div>
                         <div class="detail-item"><span>Statut</span>${this.statutBadge(l.statut_location)}</div>
-                        <div class="detail-item"><span>Articles</span><strong>${totalArticles} article(s) • ${this.formatMoney(totalPrixArticles)}</strong></div>
+                        <div class="detail-item"><span>Articles</span><strong>${totalArticles} matériel • ${this.formatMoney(totalPrixArticles)}</strong></div>
                     </div>
                 </div>
                 <div class="detail-section"><h4 class="detail-title">Articles</h4><div class="detail-transactions-scroll">${lignesHtml}</div></div>
