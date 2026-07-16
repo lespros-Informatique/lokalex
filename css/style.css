@@ -354,6 +354,9 @@ html, body {
     text-align: center;
 }
 
+.text-success { color: var(--text-success); }
+.text-danger { color: var(--danger); }
+
 /* Metrics */
 .metrics-grid {
     display: grid;

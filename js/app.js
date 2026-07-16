@@ -1643,8 +1643,16 @@ const app = {
             if (!abonnements.length) { list.innerHTML = '<div class="empty-state">Aucun abonnement</div>'; return; }
             const html = abonnements.map(a => {
                 const statusClass = 'badge-' + this.escapeHtml(a.statut_abonnement);
+                const joursRestants = this.getDaysRemaining(a.date_fin_abonnement);
+                const joursRestantsDiff = this.getRemainingDaysDiff(a.date_fin_abonnement);
+                const joursRestantsClass = joursRestantsDiff > 3 ? 'text-success' : 'text-danger';
                 return `<div class="list-item list-item-column">
-                    <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(a.boutique_code)}</div><div class="list-item-meta">${this.escapeHtml(a.forfait_code)} • ${this.formatMoney(parseFloat(a.montant_abonnement))}</div></div>
+                    <div class="list-item-info">
+                        <div class="list-item-title">${this.escapeHtml(a.boutique_code)}</div>
+                        <div class="list-item-meta">${this.escapeHtml(a.forfait_code)} • ${this.formatMoney(parseFloat(a.montant_abonnement))}</div>
+                        <div class="list-item-meta">${this.escapeHtml(this.formatFrenchDate(a.date_debut_abonnement))} → ${this.escapeHtml(this.formatFrenchDate(a.date_fin_abonnement))}</div>
+                        <div class="list-item-meta ${joursRestantsClass}">${this.escapeHtml(joursRestants)}</div>
+                    </div>
                     <div class="list-item-actions">
                         <span class="badge ${statusClass}">${this.escapeHtml(a.statut_abonnement)}</span>
                         <select class="abonnement-statut" onchange="app.setAbonnementStatut('${this.escapeHtml(a.code_abonnement)}', this.value)">
@@ -1781,6 +1789,25 @@ const app = {
 
     formatMoney(amount) {
         return new Intl.NumberFormat('fr-FR').format(amount) + ' F';
+    },
+
+    getRemainingDaysDiff(dateStr) {
+        if (!dateStr) return null;
+        const end = new Date(dateStr);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+        return Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+    },
+
+    getDaysRemaining(dateStr) {
+        if (!dateStr) return '-';
+        const end = new Date(dateStr);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+        const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+        return diff > 0 ? `${diff} jours` : diff === 0 ? 'Aujourd\'hui' : 'Expiré';
     },
 
     formatFrenchDate(dateStr) {
