@@ -128,6 +128,12 @@ class Location
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
         try {
+            $totalRestitution = 0;
+            foreach ($lignes as $l) {
+                $totalRestitution += (float) ($l['montant_restitution'] ?? 0);
+            }
+            $statutRestitution = $totalRestitution > 0 ? 'en_attente' : 'paye';
+
             Retour::create([
                 'code_retour' => $retourCode,
                 'location_code' => $code,
@@ -135,6 +141,8 @@ class Location
                 'user_code' => $userCode,
                 'date_retour' => date('Y-m-d'),
                 'statut_retour' => $statutRetour,
+                'statut_restitution' => $statutRestitution,
+                'montant_total_restitution' => $totalRestitution,
                 'observation_retour' => null,
                 'created_at_retour' => date('Y-m-d H:i:s'),
             ]);
@@ -147,6 +155,7 @@ class Location
                     'quantite_bonne' => (int) ($l['quantite_bonne'] ?? 0),
                     'quantite_endommagee' => (int) ($l['quantite_endommagee'] ?? 0),
                     'quantite_perdue' => (int) ($l['quantite_perdue'] ?? 0),
+                    'montant_restitution' => (float) ($l['montant_restitution'] ?? 0),
                     'observation_ligne_retour' => $l['observation_ligne_retour'] ?? null,
                     'created_at_ligne_retour' => date('Y-m-d H:i:s'),
                 ]);
@@ -157,7 +166,7 @@ class Location
                 }
             }
 
-            $statutLocation = ($statutRetour === 'termine') ? 'terminee' : 'en_cours';
+            $statutLocation = ($statutRetour === 'termine' && $statutRestitution === 'paye') ? 'terminee' : 'en_cours';
             $stmt = $pdo->prepare(
                 'UPDATE locations SET date_retour_effective_location = :date, statut_location = :statut, updated_at_location = :updated WHERE code_location = :code'
             );

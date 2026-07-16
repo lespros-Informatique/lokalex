@@ -513,6 +513,9 @@ const app = {
                     </div>
                     <span class="list-item-amount">${this.escapeHtml(String(a.quantite_article))} disp.</span>
                     <span class="badge ${a.statut_article === 'actif' ? 'badge-actif' : 'badge-inactif'}">${a.statut_article}</span>
+                    <button class="list-item-arrow" onclick="app.openArticleDetail('${this.escapeHtml(a.code_article)}')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
                     <button class="list-item-arrow" onclick="app.editArticle('${this.escapeHtml(a.code_article)}')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     </button>
@@ -602,6 +605,65 @@ const app = {
                 this.toast(err.message, 'error');
             }
         });
+    },
+
+    async openArticleDetail(code) {
+        const modal = document.getElementById('article-detail-modal');
+        const sheet = document.getElementById('article-detail-sheet');
+        sheet.innerHTML = '<div class="skeleton skeleton-list"><div class="skeleton-list-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-content"><div class="skeleton skeleton-line w-60"></div><div class="skeleton skeleton-line w-40"></div></div></div></div>';
+        modal.classList.add('open');
+        try {
+            const data = await this.api(`/articles/show?code=${encodeURIComponent(code)}`);
+            this.currentArticle = data.data;
+            this.renderArticleDetail();
+        } catch (err) {
+            sheet.innerHTML = `<div class="empty-state">${this.escapeHtml(err.message)}</div>`;
+        }
+    },
+
+    closeArticleDetail() {
+        const m = document.getElementById('article-detail-modal');
+        if (m) m.classList.remove('open');
+    },
+
+    renderArticleDetail() {
+        const sheet = document.getElementById('article-detail-sheet');
+        const d = this.currentArticle;
+        if (!d) return;
+        const a = d.article || {};
+        const history = d.history || {};
+        const locations = history.locations || [];
+        const retours = history.retours || [];
+
+        const locationsHtml = locations.length ? locations.map(l => `
+            <div class="list-item">
+                <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(l.code_location)}</div>
+                <div class="list-item-meta">${this.escapeHtml(l.nom_client || '-')} • ${this.escapeHtml(l.date_sortie_location)} → ${this.escapeHtml(l.date_retour_effective_location || l.date_retour_prevue_location)}</div></div>
+                <span class="badge ${l.statut_location === 'terminee' ? 'badge-terminee' : l.statut_location === 'en_cours' ? 'badge-en_cours' : 'badge-inactif'}">${this.escapeHtml(l.statut_location)}</span>
+            </div>`).join('') : '<div class="empty-state">Aucune location</div>';
+
+        const retoursHtml = retours.length ? retours.map(r => `
+            <div class="list-item">
+                <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(r.code_retour)}</div>
+                <div class="list-item-meta">${this.escapeHtml(r.date_retour)} • Bonne: ${r.quantite_bonne} • Endommagée: ${r.quantite_endommagee} • Perdue: ${r.quantite_perdue}${r.montant_restitution > 0 ? ' • Restitution: ' + this.formatMoney(parseFloat(r.montant_restitution)) : ''}</div></div>
+                <span class="badge ${r.statut_restitution === 'paye' ? 'badge-terminee' : 'badge-en_cours'}">${this.escapeHtml(r.statut_restitution)}</span>
+            </div>`).join('') : '<div class="empty-state">Aucun retour</div>';
+
+        sheet.innerHTML = `
+            <div class="modal-header"><h3>${this.escapeHtml(a.libelle_article || 'Article')}</h3><button class="modal-close" onclick="app.closeArticleDetail()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+            <div class="modal-body">
+                <div class="detail-section"><h4 class="detail-title">Informations</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item"><span>Référence</span><strong>${this.escapeHtml(a.code_article)}</strong></div>
+                        <div class="detail-item"><span>Catégorie</span><strong>${this.escapeHtml(a.libelle_categorie || 'Sans catégorie')}</strong></div>
+                        <div class="detail-item"><span>Prix location</span><strong>${this.formatMoney(parseFloat(a.prix_location_article || 0))}</strong></div>
+                        <div class="detail-item"><span>Stock</span><strong>${a.quantite_article} disponible(s)</strong></div>
+                        <div class="detail-item"><span>Statut</span>${this.statutBadge(a.statut_article)}</div>
+                    </div>
+                </div>
+                <div class="detail-section"><h4 class="detail-title">Locations (${locations.length})</h4><div class="detail-transactions-scroll">${locationsHtml}</div></div>
+                <div class="detail-section"><h4 class="detail-title">Retours (${retours.length})</h4><div class="detail-transactions-scroll">${retoursHtml}</div></div>
+            </div>`;
     },
 
     async loadCategorieOptions(selectId) {
@@ -899,6 +961,7 @@ const app = {
         const lignes = d.lignes || [];
         const paiements = d.paiements || [];
         const retours = d.retours || [];
+        const pendingRestitution = d.pending_restitution || null;
         const totalArticles = lignes.reduce((s, ll) => s + parseInt(ll.quantite_ligne_location || 0), 0);
         const totalPrixArticles = lignes.reduce((s, ll) => s + parseFloat(ll.montant_ligne_location || 0), 0);
         const lignesHtml = lignes.length ? lignes.map(ll => `
@@ -915,18 +978,20 @@ const app = {
             </div>`).join('') : '<div class="empty-state">Aucun paiement</div>';
         const retoursHtml = retours.length ? retours.map(r => `
             <div class="list-item">
-                <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(this.formatFrenchDate(r.date_retour))} • ${this.escapeHtml(r.statut_retour)}</div>
+                <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(this.formatFrenchDate(r.date_retour))} • ${this.escapeHtml(r.statut_retour)}${r.montant_total_restitution > 0 ? ' • Restitution: ' + this.formatMoney(parseFloat(r.montant_total_restitution)) : ''}</div>
                 <div class="list-item-meta">${this.escapeHtml(r.observation_retour || '')}</div></div>
             </div>
             ${(r.lignes || []).map(ll => `
                 <div class="list-item" style="padding-left: 20px;">
                     <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(ll.libelle_article || ll.article_code)}</div>
-                    <div class="list-item-meta">Bonne: ${ll.quantite_bonne} • Endommagée: ${ll.quantite_endommagee} • Perdue: ${ll.quantite_perdue}</div></div>
+                    <div class="list-item-meta">Bonne: ${ll.quantite_bonne} • Endommagée: ${ll.quantite_endommagee} • Perdue: ${ll.quantite_perdue}${ll.montant_restitution > 0 ? ' • Restitution: ' + this.formatMoney(parseFloat(ll.montant_restitution)) : ''}</div></div>
                 </div>
             `).join('')}
         `).join('') : '<div class="empty-state">Aucun retour</div>';
         const terminee = l.statut_location === 'terminee';
-        const hasReste = parseFloat(l.reste_location || 0) > 0;
+        const hasReste = parseFloat(l.reste_location || 0) > 0 || (pendingRestitution && pendingRestitution.statut_restitution !== 'paye');
+        const showRetourBtn = !terminee && !hasReste;
+        const showRestitutionBtn = pendingRestitution && pendingRestitution.statut_restitution !== 'paye';
         sheet.innerHTML = `
             <div class="modal-header"><h3>Location</h3><button class="modal-close" onclick="app.closeLocationDetail()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
             <div class="modal-body">
@@ -953,7 +1018,8 @@ const app = {
                 <div class="detail-section"><h4 class="detail-title">Retours</h4><div class="detail-transactions-scroll">${retoursHtml}</div></div>
                 <div class="detail-actions">
                     ${terminee ? '' : `<button class="btn btn-primary" onclick="app.openPaiement('${this.escapeHtml(l.code_location)}')">+ Paiement</button>`}
-                    ${terminee || hasReste ? '' : `<button class="btn btn-secondary" onclick="app.openRetour('${this.escapeHtml(l.code_location)}')">Retour</button>`}
+                    ${showRetourBtn ? `<button class="btn btn-secondary" onclick="app.openRetour('${this.escapeHtml(l.code_location)}')">Retour</button>` : ''}
+                    ${showRestitutionBtn ? `<button class="btn btn-secondary" onclick="app.openRestitution('${this.escapeHtml(pendingRestitution.code_retour)}')">Payer restitution (${this.formatMoney(parseFloat(pendingRestitution.montant_total_restitution))})</button>` : ''}
                 </div>
             </div>`;
     },
@@ -970,21 +1036,39 @@ const app = {
         if (reste > 0) { this.toast('Impossible de faire un retour tant que le reste à payer est supérieur à 0', 'error'); return; }
         const lignes = d.lignes || [];
         document.getElementById('retour-code').value = code;
+        document.getElementById('retour-total-restitution').value = '0 F';
         document.getElementById('retour-lignes').innerHTML = lignes.map(ll => `
             <div class="retour-ligne" data-article="${this.escapeHtml(ll.article_code)}" data-max="${ll.quantite_ligne_location}">
                 <div class="input-group">
                     <label>${this.escapeHtml(ll.libelle_article || ll.article_code)} (${ll.quantite_ligne_location} loué(s))</label>
                     <div class="retour-qte-grid">
-                        <input type="number" class="retour-qte-bonne" placeholder="Bonne" min="0" max="${ll.quantite_ligne_location}">
-                        <input type="number" class="retour-qte-endommagee" placeholder="Endommagée" min="0" max="${ll.quantite_ligne_location}">
-                        <input type="number" class="retour-qte-perdue" placeholder="Perdue" min="0" max="${ll.quantite_ligne_location}">
+                        <input type="number" class="retour-qte-bonne" placeholder="Bonne" min="0" max="${ll.quantite_ligne_location}" oninput="app.updateRetourTotal()">
+                        <input type="number" class="retour-qte-endommagee" placeholder="Endommagée" min="0" max="${ll.quantite_ligne_location}" oninput="app.updateRetourTotal()">
+                        <input type="number" class="retour-qte-perdue" placeholder="Perdue" min="0" max="${ll.quantite_ligne_location}" oninput="app.updateRetourTotal()">
                     </div>
+                </div>
+                <div class="input-group">
+                    <input type="number" class="retour-restitution" placeholder="Restitution (F) pour cette ligne" min="0" step="1" oninput="app.updateRetourTotal()">
                 </div>
                 <div class="input-group">
                     <input type="text" class="retour-obs" placeholder="Observation (optionnel)">
                 </div>
             </div>`).join('');
         document.getElementById('retour-modal').classList.add('open');
+    },
+
+    updateRetourTotal() {
+        const rows = document.querySelectorAll('#retour-lignes .retour-ligne');
+        let total = 0;
+        rows.forEach(row => {
+            const endommagee = parseInt(row.querySelector('.retour-qte-endommagee').value, 10) || 0;
+            const perdue = parseInt(row.querySelector('.retour-qte-perdue').value, 10) || 0;
+            const restitution = parseFloat(row.querySelector('.retour-restitution').value) || 0;
+            if (endommagee > 0 || perdue > 0) {
+                total += restitution;
+            }
+        });
+        document.getElementById('retour-total-restitution').value = this.formatMoney(total);
     },
 
     closeRetour() {
@@ -1005,10 +1089,11 @@ const app = {
             const bonne = Math.min(parseInt(row.querySelector('.retour-qte-bonne').value, 10) || 0, max);
             const endommagee = Math.min(parseInt(row.querySelector('.retour-qte-endommagee').value, 10) || 0, max - bonne);
             const perdue = Math.min(parseInt(row.querySelector('.retour-qte-perdue').value, 10) || 0, max - bonne - endommagee);
+            const restitution = parseFloat(row.querySelector('.retour-restitution').value) || 0;
             const observation = row.querySelector('.retour-obs').value.trim();
             const total = bonne + endommagee + perdue;
             if (total > 0) {
-                lignes.push({ article_code: article, quantite_bonne: bonne, quantite_endommagee: endommagee, quantite_perdue: perdue, observation_ligne_retour: observation || null });
+                lignes.push({ article_code: article, quantite_bonne: bonne, quantite_endommagee: endommagee, quantite_perdue: perdue, montant_restitution: restitution, observation_ligne_retour: observation || null });
             }
         });
         if (!lignes.length) { this.toast('Indiquez les quantités retournées', 'error'); return; }
@@ -1018,7 +1103,42 @@ const app = {
             const result = await this.api('/locations/retour', { method: 'POST', body: JSON.stringify({ code, lignes }) });
             this.closeRetour();
             this.toast('Retour enregistré', 'success');
+            if (result.data.total_restitution > 0) {
+                this.toast('Restitution requise : ' + this.formatMoney(result.data.total_restitution), 'error');
+            }
             this.openLocationDetail(code);
+        } catch (err) {
+            this.toast(err.message, 'error');
+        } finally {
+            this.setButtonLoading(btn, false);
+        }
+    },
+
+    openRestitution(retourCode) {
+        document.getElementById('restitution-retour-code').value = retourCode;
+        document.getElementById('restitution-montant').value = '';
+        document.getElementById('restitution-modal').classList.add('open');
+    },
+
+    closeRestitution() {
+        const m = document.getElementById('restitution-modal');
+        if (m) m.classList.remove('open');
+    },
+
+    async handleRestitution(e) {
+        e.preventDefault();
+        const retourCode = document.getElementById('restitution-retour-code').value;
+        const montant = parseFloat(document.getElementById('restitution-montant').value);
+        if (!montant || montant <= 0) { this.toast('Montant invalide', 'error'); return; }
+        const btn = e.target.querySelector('button[type="submit"]');
+        this.setButtonLoading(btn, true);
+        try {
+            const result = await this.api('/locations/restitution', { method: 'POST', body: JSON.stringify({ code: retourCode, montant }) });
+            this.closeRestitution();
+            this.toast('Restitution payée', 'success');
+            if (this.currentLocationCode) {
+                this.openLocationDetail(this.currentLocationCode);
+            }
         } catch (err) {
             this.toast(err.message, 'error');
         } finally {

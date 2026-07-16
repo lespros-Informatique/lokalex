@@ -80,6 +80,35 @@ class ArticleController extends Controller
         Response::success('Article mis à jour', ['article' => $updated]);
     }
 
+    public function show(): void
+    {
+        $user = $this->requireActiveSubscription();
+        $shop = Shop::findByUserCode($user['code_user']);
+        if (!$shop) {
+            Response::error('Boutique introuvable', [], 404);
+        }
+
+        $code = trim($_GET['code'] ?? '');
+        if (!$code) {
+            Response::error('Code article requis');
+        }
+        $article = Article::findByCode($code);
+        if (!$article || $article['boutique_code'] !== $shop['code_boutique']) {
+            Response::error('Article introuvable', [], 404);
+        }
+
+        try {
+            $history = Article::history($code);
+        } catch (\Throwable $e) {
+            $history = ['locations' => [], 'retours' => []];
+        }
+
+        Response::success('Détail article', [
+            'article' => $article,
+            'history' => $history,
+        ]);
+    }
+
     public function desactiver(): void
     {
         $this->requireCsrf();

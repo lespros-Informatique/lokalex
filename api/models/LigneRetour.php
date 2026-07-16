@@ -7,8 +7,8 @@ class LigneRetour
     public static function create(array $data): array
     {
         $stmt = Database::getConnection()->prepare(
-            'INSERT INTO ligne_retours (code_ligne_retour, retour_code, article_code, quantite_bonne, quantite_endommagee, quantite_perdue, observation_ligne_retour, created_at_ligne_retour)
-             VALUES (:code, :retour, :article, :bonne, :endommagee, :perdue, :observation, :created)'
+            'INSERT INTO ligne_retours (code_ligne_retour, retour_code, article_code, quantite_bonne, quantite_endommagee, quantite_perdue, montant_restitution, observation_ligne_retour, created_at_ligne_retour)
+             VALUES (:code, :retour, :article, :bonne, :endommagee, :perdue, :montant_restitution, :observation, :created)'
         );
         $stmt->execute([
             'code' => $data['code_ligne_retour'],
@@ -17,6 +17,7 @@ class LigneRetour
             'bonne' => $data['quantite_bonne'],
             'endommagee' => $data['quantite_endommagee'],
             'perdue' => $data['quantite_perdue'],
+            'montant_restitution' => $data['montant_restitution'] ?? 0,
             'observation' => $data['observation_ligne_retour'] ?? null,
             'created' => $data['created_at_ligne_retour'],
         ]);

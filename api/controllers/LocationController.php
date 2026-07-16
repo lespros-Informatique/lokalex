@@ -40,7 +40,17 @@ class LocationController extends Controller
         $client = Client::findByCode($location['client_code']);
         $lignes = LigneLocation::findByLocation($code);
         $paiements = Paiement::allByLocation($code);
-        $retours = Retour::allByLocation($code);
+
+        try {
+            $retours = Retour::allByLocation($code);
+        } catch (\Throwable $e) {
+            $retours = [];
+        }
+        try {
+            $pendingRestitution = Retour::findPendingRestitutionByLocation($code);
+        } catch (\Throwable $e) {
+            $pendingRestitution = null;
+        }
 
         Response::success('Détail location', [
             'location' => $location,
@@ -48,6 +58,7 @@ class LocationController extends Controller
             'lignes' => $lignes,
             'paiements' => $paiements,
             'retours' => $retours,
+            'pending_restitution' => $pendingRestitution,
         ]);
     }
 
@@ -160,11 +171,13 @@ class LocationController extends Controller
 
         $lignesValidees = [];
         $totalRendu = 0;
+        $totalRestitution = 0;
         foreach ($lignes as $l) {
             $articleCode = trim($l['article_code'] ?? '');
             $bonne = (int) ($l['quantite_bonne'] ?? 0);
             $endommagee = (int) ($l['quantite_endommagee'] ?? 0);
             $perdue = (int) ($l['quantite_perdue'] ?? 0);
+            $montantRestitution = (float) ($l['montant_restitution'] ?? 0);
             $observation = trim($l['observation_ligne_retour'] ?? '');
             $totalLigne = $bonne + $endommagee + $perdue;
 
@@ -172,14 +185,20 @@ class LocationController extends Controller
                 continue;
             }
 
+            if ($montantRestitution < 0) {
+                Response::error('Montant de restitution invalide', [], 400);
+            }
+
             $lignesValidees[] = [
                 'article_code' => $articleCode,
                 'quantite_bonne' => $bonne,
                 'quantite_endommagee' => $endommagee,
                 'quantite_perdue' => $perdue,
+                'montant_restitution' => $montantRestitution,
                 'observation_ligne_retour' => $observation ?: null,
             ];
             $totalRendu += $totalLigne;
+            $totalRestitution += $montantRestitution;
         }
         if (count($lignesValidees) === 0) {
             Response::error('Aucune quantité valide');
@@ -191,13 +210,68 @@ class LocationController extends Controller
         $totalLivre = (int) $stmt->fetchColumn();
 
         $statutRetour = ($totalRendu >= $totalLivre) ? 'termine' : 'partiel';
-        if ($totalRendu > $totalLivre) {
-            Response::error('Les quantités retournées dépassent les quantités louées', [], 400);
-        }
         $retourCode = 'RET' . time() . mt_rand(100, 999);
 
         $location = Location::retour($code, $lignesValidees, $retourCode, $shop['code_boutique'], $user['code_user'], $statutRetour);
-        Response::success('Retour enregistré', ['location' => $location, 'retour_code' => $retourCode]);
+        Response::success('Retour enregistré', ['location' => $location, 'retour_code' => $retourCode, 'total_restitution' => $totalRestitution]);
+    }
+
+    public function payerRestitution(): void
+    {
+        $this->requireCsrf();
+        $user = $this->requireActiveSubscription();
+        $shop = Shop::findByUserCode($user['code_user']);
+        if (!$shop) {
+            Response::error('Boutique introuvable', [], 404);
+        }
+
+        $code = trim($this->input('code', ''));
+        if (!$code) {
+            Response::error('Code retour requis');
+        }
+
+        $retour = Retour::findByCode($code);
+        if (!$retour || $retour['boutique_code'] !== $shop['code_boutique']) {
+            Response::error('Retour introuvable', [], 404);
+        }
+
+        if ($retour['statut_restitution'] === 'paye') {
+            Response::error('Restitution déjà payée');
+        }
+
+        $montant = (float) ($this->input('montant', 0));
+        if ($montant <= 0) {
+            Response::error('Montant de restitution invalide');
+        }
+
+        $pdo = Database::getConnection();
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare('UPDATE retours SET statut_restitution = :statut, updated_at_retour = :updated WHERE code_retour = :code');
+            $stmt->execute([
+                'statut' => 'paye',
+                'updated' => date('Y-m-d H:i:s'),
+                'code' => $code,
+            ]);
+
+            $location = Location::findByCode($retour['location_code']);
+            if ($location && $location['statut_location'] === 'en_cours') {
+                $stmt2 = $pdo->prepare('UPDATE locations SET statut_location = :statut, updated_at_location = :updated WHERE code_location = :code');
+                $stmt2->execute([
+                    'statut' => 'terminee',
+                    'updated' => date('Y-m-d H:i:s'),
+                    'code' => $retour['location_code'],
+                ]);
+            }
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+
+        $location = Location::findByCode($retour['location_code']);
+        Response::success('Restitution payée', ['location' => $location]);
     }
 
     public function addPaiement(): void

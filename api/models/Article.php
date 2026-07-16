@@ -100,4 +100,43 @@ class Article
             'updated' => date('Y-m-d H:i:s'),
         ]);
     }
+
+    public static function history(string $code): array
+    {
+        $pdo = Database::getConnection();
+
+        try {
+            $stmt = $pdo->prepare(
+                'SELECT ll.*, l.code_location, l.date_sortie_location, l.date_retour_prevue_location, l.date_retour_effective_location, l.statut_location, c.nom_client
+                 FROM ligne_locations ll
+                 JOIN locations l ON l.code_location = ll.location_code
+                 LEFT JOIN clients c ON c.code_client = l.client_code
+                 WHERE ll.article_code = :code
+                 ORDER BY l.date_sortie_location DESC, l.created_at_location DESC'
+            );
+            $stmt->execute(['code' => $code]);
+            $locations = $stmt->fetchAll();
+        } catch (\Throwable $e) {
+            $locations = [];
+        }
+
+        try {
+            $stmt2 = $pdo->prepare(
+                'SELECT lr.*, r.code_retour, r.date_retour, r.statut_retour, r.statut_restitution
+                 FROM ligne_retours lr
+                 JOIN retours r ON r.code_retour = lr.retour_code
+                 WHERE lr.article_code = :code
+                 ORDER BY r.date_retour DESC, lr.id_ligne_retour ASC'
+            );
+            $stmt2->execute(['code' => $code]);
+            $retours = $stmt2->fetchAll();
+        } catch (\Throwable $e) {
+            $retours = [];
+        }
+
+        return [
+            'locations' => $locations,
+            'retours' => $retours,
+        ];
+    }
 }
