@@ -898,6 +898,8 @@ const app = {
         const c = d.client || {};
         const lignes = d.lignes || [];
         const paiements = d.paiements || [];
+        const totalArticles = lignes.reduce((s, ll) => s + parseInt(ll.quantite_ligne_location || 0), 0);
+        const totalPrixArticles = lignes.reduce((s, ll) => s + parseFloat(ll.montant_ligne_location || 0), 0);
         const lignesHtml = lignes.length ? lignes.map(ll => `
             <div class="list-item">
                 <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(ll.libelle_article || ll.article_code)}</div>
@@ -919,6 +921,7 @@ const app = {
                     <div class="detail-grid">
                         <div class="detail-item"><span>Nom</span><strong>${this.escapeHtml(c.nom_client || '-')}</strong></div>
                         <div class="detail-item"><span>Téléphone</span><strong>${this.escapeHtml(c.telephone_client || '-')}</strong></div>
+                        <div class="detail-item"><span>Adresse</span><strong>${this.escapeHtml(c.adresse_client || '-')}</strong></div>
                     </div>
                 </div>
                 <div class="detail-section"><h4 class="detail-title">Détails</h4>
@@ -929,6 +932,7 @@ const app = {
                         <div class="detail-item"><span>Avance</span><strong>${this.formatMoney(parseFloat(l.avance_location))}</strong></div>
                         <div class="detail-item"><span>Reste</span><strong>${this.formatMoney(parseFloat(l.reste_location))}</strong></div>
                         <div class="detail-item"><span>Statut</span>${this.statutBadge(l.statut_location)}</div>
+                        <div class="detail-item"><span>Articles</span><strong>${totalArticles} article(s) • ${this.formatMoney(totalPrixArticles)}</strong></div>
                     </div>
                 </div>
                 <div class="detail-section"><h4 class="detail-title">Articles</h4><div class="detail-transactions-scroll">${lignesHtml}</div></div>
