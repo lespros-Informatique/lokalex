@@ -2,7 +2,7 @@
 // online
 // return [
 //     'host' => 'localhost',
-//     'dbname' => 'c2588565c_nafa',
+//     'dbname' => 'c2588565c_lokalex',
 //     'username' => 'c2588565c_kassann',
 //     'password' => 'c2588565c_kassann',
 //     'charset' => 'utf8mb4',

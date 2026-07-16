@@ -156,3 +156,4 @@
 [2026-07-16 00:40:34] [AUTH] [GET /lokalex/api/dashboard?client_date=2026-07-16] [::1] Auth success {"user_code":"USRVEND001"}
 [2026-07-16 00:40:41] [AUTH] [GET /lokalex/api/search?q=g] [::1] Auth success {"user_code":"USRVEND001"}
 [2026-07-16 00:40:43] [AUTH] [GET /lokalex/api/locations/show?code=LOC1784155767417] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-16 23:41:10] [AUTH] [GET /location/api/dashboard?client_date=2026-07-16] [::1] Auth success {"user_code":"USRVEND001"}
