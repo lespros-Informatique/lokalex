@@ -131,6 +131,10 @@ const app = {
         window.addEventListener('online', () => this.toast('Connexion rétablie', 'success'));
         window.addEventListener('offline', () => this.toast('Pas de connexion Internet', 'error'));
         window.addEventListener('hashchange', () => {
+            if (this._hashChangeFromNavigate) {
+                this._hashChangeFromNavigate = false;
+                return;
+            }
             const page = window.location.hash.replace('#', '');
             if (page) this.navigate(page);
         });
@@ -139,6 +143,7 @@ const app = {
     navigate(page) {
         const targetHash = '#' + page;
         if (window.location.hash !== targetHash) {
+            this._hashChangeFromNavigate = true;
             window.location.hash = targetHash;
         }
 
@@ -405,61 +410,67 @@ const app = {
     },
 
     async renderDashboard() {
-        const isDev = this.currentUser && this.currentUser.role_user === 'developpeur';
-        if (!isDev && !this.currentShop) return;
-        const metricsGrid = document.querySelector('#page-dashboard .metrics-grid');
-        const recentList = document.getElementById('recent-list');
-        const devSection = document.getElementById('dashboard-dev');
-        if (isDev) {
-            if (metricsGrid) metricsGrid.style.display = 'none';
-            if (devSection) {
-                devSection.style.display = '';
-                const devMetrics = devSection.querySelector('.metrics-grid');
-                if (devMetrics) devMetrics.innerHTML = `
-                    <div class="metric-card"><span class="metric-label">Boutiques</span><span class="metric-value">...</span></div>
-                    <div class="metric-card"><span class="metric-label">Vendeurs</span><span class="metric-value">...</span></div>
-                    <div class="metric-card metric-expenses metric-card-full"><span class="metric-label">Abonnements expirés</span><span class="metric-value">...</span></div>`;
-            }
-            if (recentList) recentList.style.display = 'none';
-        } else {
-            if (recentList) this.showSkeleton(recentList, 'list');
-            if (metricsGrid) {
-                ['dash-en-cours', 'dash-retours', 'dash-montant', 'dash-clients', 'dash-retards'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = '';
-                });
-            }
-        }
+        if (this._dashboardLoading) return;
+        this._dashboardLoading = true;
         try {
-            const data = await this.api(`/dashboard?client_date=${this.getClientDate()}`);
-            const nameEl = document.getElementById('dash-user-name');
-            if (nameEl) nameEl.textContent = this.currentUser ? this.currentUser.nom_user : '';
+            const isDev = this.currentUser && this.currentUser.role_user === 'developpeur';
+            if (!isDev && !this.currentShop) return;
+            const metricsGrid = document.querySelector('#page-dashboard .metrics-grid');
+            const recentList = document.getElementById('recent-list');
+            const devSection = document.getElementById('dashboard-dev');
             if (isDev) {
-                const s = data.data.stats || {};
+                if (metricsGrid) metricsGrid.style.display = 'none';
                 if (devSection) {
+                    devSection.style.display = '';
                     const devMetrics = devSection.querySelector('.metrics-grid');
                     if (devMetrics) devMetrics.innerHTML = `
-                        <div class="metric-card"><span class="metric-label">Boutiques</span><span class="metric-value">${s.boutiques ?? 0}</span></div>
-                        <div class="metric-card"><span class="metric-label">Vendeurs</span><span class="metric-value">${s.vendeurs ?? 0}</span></div>
-                        <div class="metric-card metric-expenses metric-card-full"><span class="metric-label">Abonnements expirés</span><span class="metric-value">${s.abonnements_expires ?? 0}</span></div>`;
+                        <div class="metric-card"><span class="metric-label">Boutiques</span><span class="metric-value">...</span></div>
+                        <div class="metric-card"><span class="metric-label">Vendeurs</span><span class="metric-value">...</span></div>
+                        <div class="metric-card metric-expenses metric-card-full"><span class="metric-label">Abonnements expirés</span><span class="metric-value">...</span></div>`;
                 }
-                return;
+                if (recentList) recentList.style.display = 'none';
+            } else {
+                if (recentList) this.showSkeleton(recentList, 'list');
+                if (metricsGrid) {
+                    ['dash-en-cours', 'dash-retours', 'dash-montant', 'dash-clients', 'dash-retards'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.textContent = '';
+                    });
+                }
             }
-            if (metricsGrid) {
-                const enCours = document.getElementById('dash-en-cours');
-                const retours = document.getElementById('dash-retours');
-                const montant = document.getElementById('dash-montant');
-                const clients = document.getElementById('dash-clients');
-                const retards = document.getElementById('dash-retards');
-                if (enCours) enCours.textContent = data.data.en_cours ?? 0;
-                if (retours) retours.textContent = data.data.retours_prevus ?? 0;
-                if (montant) montant.textContent = data.data.montant_jour ?? '0 F';
-                if (clients) clients.textContent = data.data.clients ?? 0;
-                if (retards) retards.textContent = data.data.retards ?? 0;
+            try {
+                const data = await this.api(`/dashboard?client_date=${this.getClientDate()}`);
+                const nameEl = document.getElementById('dash-user-name');
+                if (nameEl) nameEl.textContent = this.currentUser ? this.currentUser.nom_user : '';
+                if (isDev) {
+                    const s = data.data.stats || {};
+                    if (devSection) {
+                        const devMetrics = devSection.querySelector('.metrics-grid');
+                        if (devMetrics) devMetrics.innerHTML = `
+                            <div class="metric-card"><span class="metric-label">Boutiques</span><span class="metric-value">${s.boutiques ?? 0}</span></div>
+                            <div class="metric-card"><span class="metric-label">Vendeurs</span><span class="metric-value">${s.vendeurs ?? 0}</span></div>
+                            <div class="metric-card metric-expenses metric-card-full"><span class="metric-label">Abonnements expirés</span><span class="metric-value">${s.abonnements_expires ?? 0}</span></div>`;
+                    }
+                    return;
+                }
+                if (metricsGrid) {
+                    const enCours = document.getElementById('dash-en-cours');
+                    const retours = document.getElementById('dash-retours');
+                    const montant = document.getElementById('dash-montant');
+                    const clients = document.getElementById('dash-clients');
+                    const retards = document.getElementById('dash-retards');
+                    if (enCours) enCours.textContent = data.data.en_cours ?? 0;
+                    if (retours) retours.textContent = data.data.retours_prevus ?? 0;
+                    if (montant) montant.textContent = data.data.montant_jour ?? '0 F';
+                    if (clients) clients.textContent = data.data.clients ?? 0;
+                    if (retards) retards.textContent = data.data.retards ?? 0;
+                }
+                if (recentList) this.renderRecentLocations(data.data.recent);
+            } catch (err) {
+                this.toast(err.message, 'error');
             }
-            if (recentList) this.renderRecentLocations(data.data.recent);
-        } catch (err) {
-            this.toast(err.message, 'error');
+        } finally {
+            this._dashboardLoading = false;
         }
     },
 
