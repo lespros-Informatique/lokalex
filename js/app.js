@@ -1018,7 +1018,7 @@ const app = {
                 <div class="detail-section"><h4 class="detail-title">Retours</h4><div class="detail-transactions-scroll">${retoursHtml}</div></div>
                 <div class="detail-actions">
                     ${terminee ? '' : `<button class="btn btn-primary" onclick="app.openPaiement('${this.escapeHtml(l.code_location)}')">+ Paiement</button>`}
-                    ${showRetourBtn ? `<button class="btn btn-secondary" onclick="app.openRetour('${this.escapeHtml(l.code_location)}')">Retour</button>` : ''}
+                    ${!terminee ? `<button class="btn btn-secondary" onclick="app.openRetour('${this.escapeHtml(l.code_location)}')">Retour</button>` : ''}
                     ${showRestitutionBtn ? `<button class="btn btn-secondary" onclick="app.openRestitution('${this.escapeHtml(pendingRestitution.code_retour)}')">Payer restitution (${this.formatMoney(parseFloat(pendingRestitution.montant_total_restitution))})</button>` : ''}
                 </div>
             </div>`;

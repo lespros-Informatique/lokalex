@@ -172,6 +172,18 @@ class LocationController extends Controller
         $lignesValidees = [];
         $totalRendu = 0;
         $totalRestitution = 0;
+
+        $retoursExistants = Retour::allByLocation($code);
+        $retourExistant = !empty($retoursExistants) ? $retoursExistants[0] : null;
+        $lignesRetourExistantes = $retourExistant['lignes'] ?? [];
+
+        $dejaRetourneParArticle = [];
+        foreach ($lignesRetourExistantes as $lr) {
+            $articleCode = $lr['article_code'];
+            $totalLigne = (int) ($lr['quantite_bonne'] ?? 0) + (int) ($lr['quantite_endommagee'] ?? 0) + (int) ($lr['quantite_perdue'] ?? 0);
+            $dejaRetourneParArticle[$articleCode] = ($dejaRetourneParArticle[$articleCode] ?? 0) + $totalLigne;
+        }
+
         foreach ($lignes as $l) {
             $articleCode = trim($l['article_code'] ?? '');
             $bonne = (int) ($l['quantite_bonne'] ?? 0);
@@ -183,6 +195,15 @@ class LocationController extends Controller
 
             if (!$articleCode || $totalLigne <= 0) {
                 continue;
+            }
+
+            $dejaRetourne = $dejaRetourneParArticle[$articleCode] ?? 0;
+            $stmtLigneLoc = Database::getConnection()->prepare('SELECT quantite_ligne_location FROM ligne_locations WHERE location_code = :code AND article_code = :article LIMIT 1');
+            $stmtLigneLoc->execute(['code' => $code, 'article' => $articleCode]);
+            $quantiteLouee = (int) $stmtLigneLoc->fetchColumn();
+
+            if ($dejaRetourne + $totalLigne > $quantiteLouee) {
+                Response::error("Quantité retournée dépasse la quantité louée pour l'article {$articleCode} (déjà retourné: {$dejaRetourne}, loué: {$quantiteLouee})", [], 400);
             }
 
             if ($montantRestitution < 0) {
@@ -212,9 +233,12 @@ class LocationController extends Controller
         $statutRetour = ($totalRendu >= $totalLivre) ? 'termine' : 'partiel';
         $retourCode = 'RET' . time() . mt_rand(100, 999);
 
+        $retours = Retour::allByLocation($code);
+        $existingRetourCode = !empty($retours) ? $retours[0]['code_retour'] : null;
+
         try {
-            $location = Location::retour($code, $lignesValidees, $retourCode, $shop['code_boutique'], $user['code_user'], $statutRetour);
-            Response::success('Retour enregistré', ['location' => $location, 'retour_code' => $retourCode, 'total_restitution' => $totalRestitution]);
+            $location = Location::retour($code, $lignesValidees, $retourCode, $shop['code_boutique'], $user['code_user'], $statutRetour, $existingRetourCode);
+            Response::success('Retour enregistré', ['location' => $location, 'retour_code' => $existingRetourCode ?: $retourCode, 'total_restitution' => $totalRestitution]);
         } catch (\Throwable $e) {
             Response::error('Retour invalide : ' . $e->getMessage(), ['trace' => $e->getTraceAsString()], 400);
         }

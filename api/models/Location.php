@@ -123,7 +123,7 @@ class Location
         return $stmt->fetchAll();
     }
 
-    public static function retour(string $code, array $lignes, string $retourCode, string $boutiqueCode, string $userCode, string $statutRetour): ?array
+    public static function retour(string $code, array $lignes, string $retourCode, string $boutiqueCode, string $userCode, string $statutRetour, ?string $existingRetourCode = null): ?array
     {
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
@@ -132,20 +132,33 @@ class Location
             foreach ($lignes as $l) {
                 $totalRestitution += (float) ($l['montant_restitution'] ?? 0);
             }
-            $statutRestitution = $totalRestitution > 0 ? 'en_attente' : 'paye';
 
-            Retour::create([
-                'code_retour' => $retourCode,
-                'location_code' => $code,
-                'boutique_code' => $boutiqueCode,
-                'user_code' => $userCode,
-                'date_retour' => date('Y-m-d'),
-                'statut_retour' => $statutRetour,
-                'statut_restitution' => $statutRestitution,
-                'montant_total_restitution' => $totalRestitution,
-                'observation_retour' => null,
-                'created_at_retour' => date('Y-m-d H:i:s'),
-            ]);
+            if ($existingRetourCode) {
+                $retour = Retour::findByCode($existingRetourCode);
+                if ($retour && $retour['statut_restitution'] !== 'paye') {
+                    $stmt = $pdo->prepare('UPDATE retours SET montant_total_restitution = montant_total_restitution + :montant, updated_at_retour = :updated WHERE code_retour = :code');
+                    $stmt->execute([
+                        'montant' => $totalRestitution,
+                        'updated' => date('Y-m-d H:i:s'),
+                        'code' => $existingRetourCode,
+                    ]);
+                }
+                $retourCode = $existingRetourCode;
+            } else {
+                $statutRestitution = $totalRestitution > 0 ? 'en_attente' : 'paye';
+                Retour::create([
+                    'code_retour' => $retourCode,
+                    'location_code' => $code,
+                    'boutique_code' => $boutiqueCode,
+                    'user_code' => $userCode,
+                    'date_retour' => date('Y-m-d'),
+                    'statut_retour' => $statutRetour,
+                    'statut_restitution' => $statutRestitution,
+                    'montant_total_restitution' => $totalRestitution,
+                    'observation_retour' => null,
+                    'created_at_retour' => date('Y-m-d H:i:s'),
+                ]);
+            }
 
             foreach ($lignes as $l) {
                 LigneRetour::create([
@@ -160,22 +173,26 @@ class Location
                     'created_at_ligne_retour' => date('Y-m-d H:i:s'),
                 ]);
 
-                $bonne = (int) ($l['quantite_bonne'] ?? 0);
-                if ($bonne > 0) {
-                    Article::adjustStock($l['article_code'], $bonne);
+                if (!$existingRetourCode) {
+                    $bonne = (int) ($l['quantite_bonne'] ?? 0);
+                    if ($bonne > 0) {
+                        Article::adjustStock($l['article_code'], $bonne);
+                    }
                 }
             }
 
-            $statutLocation = ($statutRetour === 'termine' && $statutRestitution === 'paye') ? 'terminee' : 'en_cours';
-            $stmt = $pdo->prepare(
-                'UPDATE locations SET date_retour_effective_location = :date, statut_location = :statut, updated_at_location = :updated WHERE code_location = :code'
-            );
-            $stmt->execute([
-                'code' => $code,
-                'date' => date('Y-m-d'),
-                'statut' => $statutLocation,
-                'updated' => date('Y-m-d H:i:s'),
-            ]);
+            if (!$existingRetourCode) {
+                $statutLocation = ($statutRetour === 'termine' && $totalRestitution === 0) ? 'terminee' : 'en_cours';
+                $stmt = $pdo->prepare(
+                    'UPDATE locations SET date_retour_effective_location = :date, statut_location = :statut, updated_at_location = :updated WHERE code_location = :code'
+                );
+                $stmt->execute([
+                    'code' => $code,
+                    'date' => date('Y-m-d'),
+                    'statut' => $statutLocation,
+                    'updated' => date('Y-m-d H:i:s'),
+                ]);
+            }
 
             $pdo->commit();
         } catch (\Throwable $e) {
