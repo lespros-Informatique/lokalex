@@ -101,9 +101,11 @@ const app = {
             document.querySelectorAll('.dev-hidden').forEach(el => el.style.display = isDev ? 'none' : '');
             const menuBtn = document.getElementById('top-menu-btn');
             if (menuBtn) menuBtn.style.display = isDev ? 'flex' : 'none';
-            this.navigate('dashboard');
+            const hash = window.location.hash.replace('#', '');
+            this.navigate(hash || 'dashboard');
         } else {
-            this.navigate('login');
+            const hash = window.location.hash.replace('#', '');
+            this.navigate(hash || 'login');
         }
     },
 
@@ -128,9 +130,18 @@ const app = {
         });
         window.addEventListener('online', () => this.toast('Connexion rétablie', 'success'));
         window.addEventListener('offline', () => this.toast('Pas de connexion Internet', 'error'));
+        window.addEventListener('hashchange', () => {
+            const page = window.location.hash.replace('#', '');
+            if (page) this.navigate(page);
+        });
     },
 
     navigate(page) {
+        const targetHash = '#' + page;
+        if (window.location.hash !== targetHash) {
+            window.location.hash = targetHash;
+        }
+
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         const target = document.getElementById('page-' + page);
         if (target) target.classList.add('active');
