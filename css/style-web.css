@@ -359,7 +359,7 @@
         top: 16px;
         left: 50%;
         transform: translateX(-50%) translateY(-20px);
-        z-index: 300;
+        z-index: 9999;
     }
 
     /* HEADER */
@@ -1403,7 +1403,7 @@
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease, transform 0.3s ease;
-        z-index: 300;
+        z-index: 9999;
         max-width: 90%;
         text-align: center;
         display: flex;

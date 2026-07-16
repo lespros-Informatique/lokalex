@@ -996,7 +996,21 @@ const app = {
         document.getElementById('paiement-montant').value = '';
         document.getElementById('paiement-reference').value = '';
         document.getElementById('paiement-mode').value = 'especes';
-        document.getElementById('paiement-modal').classList.add('open');
+        const resteInput = document.getElementById('paiement-reste');
+        if (resteInput) resteInput.value = '';
+        if (this.currentLocationCode !== code || !this.currentLocation) {
+            this.currentLocationCode = code;
+            this.api(`/locations/show?code=${encodeURIComponent(code)}`).then(data => {
+                this.currentLocation = data.data;
+                if (resteInput) resteInput.value = parseFloat(data.data.location?.reste_location || 0);
+                document.getElementById('paiement-modal').classList.add('open');
+            }).catch(() => {
+                document.getElementById('paiement-modal').classList.add('open');
+            });
+        } else {
+            if (resteInput) resteInput.value = parseFloat(this.currentLocation?.location?.reste_location || 0);
+            document.getElementById('paiement-modal').classList.add('open');
+        }
     },
 
     closePaiement() {
@@ -1008,8 +1022,10 @@ const app = {
         e.preventDefault();
         const code = document.getElementById('paiement-code').value;
         const montant = parseFloat(document.getElementById('paiement-montant').value);
+        console.log(montant);
+        
         if (!montant || montant <= 0) { this.toast('Montant invalide', 'error'); return; }
-        const reste = parseFloat(this.currentLocation?.reste_location || 0);
+        const reste = parseFloat(document.getElementById('paiement-reste')?.value || 0);
         if (montant > reste) { this.toast('Le montant ne peut pas dépasser le reste à payer (' + this.formatMoney(reste) + ')', 'error'); return; }
         const payload = {
             code,
