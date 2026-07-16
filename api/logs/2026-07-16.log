@@ -315,3 +315,6 @@
 [2026-07-16 17:10:53] [AUTH] [GET /location/api/articles?page=1&limit=20] [::1] Auth success {"user_code":"USRVEND001"}
 [2026-07-16 17:10:55] [AUTH] [GET /location/api/categories] [::1] Auth success {"user_code":"USRVEND001"}
 [2026-07-16 17:10:58] [AUTH] [GET /location/api/categories] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-16 18:05:37] [AUTH] [GET /location/api/dashboard?client_date=2026-07-16] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-16 23:38:12] [AUTH] [GET /location/api/dashboard?client_date=2026-07-16] [::1] Auth success {"user_code":"USRVEND001"}
+[2026-07-16 23:38:22] [AUTH] [GET /location/api/dashboard?client_date=2026-07-16] [::1] Auth success {"user_code":"USRVEND001"}

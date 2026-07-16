@@ -47,7 +47,6 @@ class AuthController extends Controller
 
     public function logout(): void
     {
-        $this->requireCsrf();
         setcookie('nafa_token', '', time() - 3600, '/');
         setcookie('nafa_user', '', time() - 3600, '/');
         setcookie('XSRF-TOKEN', '', time() - 3600, '/');
