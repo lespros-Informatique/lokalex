@@ -4,6 +4,8 @@ require_once __DIR__ . '/../core/Database.php';
 require_once __DIR__ . '/LigneLocation.php';
 require_once __DIR__ . '/Article.php';
 require_once __DIR__ . '/Paiement.php';
+require_once __DIR__ . '/Retour.php';
+require_once __DIR__ . '/LigneRetour.php';
 
 class Location
 {
@@ -121,23 +123,51 @@ class Location
         return $stmt->fetchAll();
     }
 
-    public static function retour(string $code, array $lignes): ?array
+    public static function retour(string $code, array $lignes, string $retourCode, string $boutiqueCode, string $userCode, string $statutRetour): ?array
     {
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
         try {
+            Retour::create([
+                'code_retour' => $retourCode,
+                'location_code' => $code,
+                'boutique_code' => $boutiqueCode,
+                'user_code' => $userCode,
+                'date_retour' => date('Y-m-d'),
+                'statut_retour' => $statutRetour,
+                'observation_retour' => null,
+                'created_at_retour' => date('Y-m-d H:i:s'),
+            ]);
+
             foreach ($lignes as $l) {
-                Article::adjustStock($l['article_code'], $l['quantite']);
+                LigneRetour::create([
+                    'code_ligne_retour' => 'LRet' . time() . mt_rand(100, 999),
+                    'retour_code' => $retourCode,
+                    'article_code' => $l['article_code'],
+                    'quantite_bonne' => (int) ($l['quantite_bonne'] ?? 0),
+                    'quantite_endommagee' => (int) ($l['quantite_endommagee'] ?? 0),
+                    'quantite_perdue' => (int) ($l['quantite_perdue'] ?? 0),
+                    'observation_ligne_retour' => $l['observation_ligne_retour'] ?? null,
+                    'created_at_ligne_retour' => date('Y-m-d H:i:s'),
+                ]);
+
+                $bonne = (int) ($l['quantite_bonne'] ?? 0);
+                if ($bonne > 0) {
+                    Article::adjustStock($l['article_code'], $bonne);
+                }
             }
+
+            $statutLocation = ($statutRetour === 'termine') ? 'terminee' : 'en_cours';
             $stmt = $pdo->prepare(
                 'UPDATE locations SET date_retour_effective_location = :date, statut_location = :statut, updated_at_location = :updated WHERE code_location = :code'
             );
             $stmt->execute([
                 'code' => $code,
                 'date' => date('Y-m-d'),
-                'statut' => 'terminee',
+                'statut' => $statutLocation,
                 'updated' => date('Y-m-d H:i:s'),
             ]);
+
             $pdo->commit();
         } catch (\Throwable $e) {
             $pdo->rollBack();

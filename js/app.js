@@ -898,6 +898,7 @@ const app = {
         const c = d.client || {};
         const lignes = d.lignes || [];
         const paiements = d.paiements || [];
+        const retours = d.retours || [];
         const totalArticles = lignes.reduce((s, ll) => s + parseInt(ll.quantite_ligne_location || 0), 0);
         const totalPrixArticles = lignes.reduce((s, ll) => s + parseFloat(ll.montant_ligne_location || 0), 0);
         const lignesHtml = lignes.length ? lignes.map(ll => `
@@ -912,6 +913,18 @@ const app = {
                 <div class="list-item-meta">${this.escapeHtml(p.mode_paiement)} ${p.reference_paiement ? '• ' + this.escapeHtml(p.reference_paiement) : ''}</div></div>
                 <span class="list-item-amount positive">+${this.formatMoney(parseFloat(p.montant_paiement))}</span>
             </div>`).join('') : '<div class="empty-state">Aucun paiement</div>';
+        const retoursHtml = retours.length ? retours.map(r => `
+            <div class="list-item">
+                <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(this.formatFrenchDate(r.date_retour))} • ${this.escapeHtml(r.statut_retour)}</div>
+                <div class="list-item-meta">${this.escapeHtml(r.observation_retour || '')}</div></div>
+            </div>
+            ${(r.lignes || []).map(ll => `
+                <div class="list-item" style="padding-left: 20px;">
+                    <div class="list-item-info"><div class="list-item-title">${this.escapeHtml(ll.libelle_article || ll.article_code)}</div>
+                    <div class="list-item-meta">Bonne: ${ll.quantite_bonne} • Endommagée: ${ll.quantite_endommagee} • Perdue: ${ll.quantite_perdue}</div></div>
+                </div>
+            `).join('')}
+        `).join('') : '<div class="empty-state">Aucun retour</div>';
         const terminee = l.statut_location === 'terminee';
         const hasReste = parseFloat(l.reste_location || 0) > 0;
         sheet.innerHTML = `
@@ -937,6 +950,7 @@ const app = {
                 </div>
                 <div class="detail-section"><h4 class="detail-title">Articles</h4><div class="detail-transactions-scroll">${lignesHtml}</div></div>
                 <div class="detail-section"><h4 class="detail-title">Paiements</h4><div class="detail-transactions-scroll">${paiementsHtml}</div></div>
+                <div class="detail-section"><h4 class="detail-title">Retours</h4><div class="detail-transactions-scroll">${retoursHtml}</div></div>
                 <div class="detail-actions">
                     ${terminee ? '' : `<button class="btn btn-primary" onclick="app.openPaiement('${this.escapeHtml(l.code_location)}')">+ Paiement</button>`}
                     ${terminee || hasReste ? '' : `<button class="btn btn-secondary" onclick="app.openRetour('${this.escapeHtml(l.code_location)}')">Retour</button>`}
@@ -956,10 +970,19 @@ const app = {
         if (reste > 0) { this.toast('Impossible de faire un retour tant que le reste à payer est supérieur à 0', 'error'); return; }
         const lignes = d.lignes || [];
         document.getElementById('retour-code').value = code;
-        document.getElementById('retour-lignes').innerHTML = lignes.map((ll, i) => `
-            <div class="input-group">
-                <label>${this.escapeHtml(ll.libelle_article || ll.article_code)} (${ll.quantite_ligne_location} loué(s))</label>
-                <input type="number" class="retour-qte" data-article="${this.escapeHtml(ll.article_code)}" data-max="${ll.quantite_ligne_location}" min="0" max="${ll.quantite_ligne_location}" value="0" placeholder="0">
+        document.getElementById('retour-lignes').innerHTML = lignes.map(ll => `
+            <div class="retour-ligne" data-article="${this.escapeHtml(ll.article_code)}" data-max="${ll.quantite_ligne_location}">
+                <div class="input-group">
+                    <label>${this.escapeHtml(ll.libelle_article || ll.article_code)} (${ll.quantite_ligne_location} loué(s))</label>
+                    <div class="retour-qte-grid">
+                        <input type="number" class="retour-qte-bonne" placeholder="Bonne" min="0" max="${ll.quantite_ligne_location}">
+                        <input type="number" class="retour-qte-endommagee" placeholder="Endommagée" min="0" max="${ll.quantite_ligne_location}">
+                        <input type="number" class="retour-qte-perdue" placeholder="Perdue" min="0" max="${ll.quantite_ligne_location}">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="retour-obs" placeholder="Observation (optionnel)">
+                </div>
             </div>`).join('');
         document.getElementById('retour-modal').classList.add('open');
     },
@@ -974,17 +997,25 @@ const app = {
         const code = document.getElementById('retour-code').value;
         const reste = parseFloat(this.currentLocation?.reste_location || 0);
         if (reste > 0) { this.toast('Impossible de faire un retour tant que le reste à payer est supérieur à 0', 'error'); return; }
-        const inputs = document.querySelectorAll('#retour-lignes .retour-qte');
+        const rows = document.querySelectorAll('#retour-lignes .retour-ligne');
         const lignes = [];
-        inputs.forEach(inp => {
-            const q = parseInt(inp.value, 10) || 0;
-            if (q > 0) lignes.push({ article_code: inp.dataset.article, quantite: q });
+        rows.forEach(row => {
+            const article = row.dataset.article;
+            const max = parseInt(row.dataset.max, 10) || 0;
+            const bonne = Math.min(parseInt(row.querySelector('.retour-qte-bonne').value, 10) || 0, max);
+            const endommagee = Math.min(parseInt(row.querySelector('.retour-qte-endommagee').value, 10) || 0, max - bonne);
+            const perdue = Math.min(parseInt(row.querySelector('.retour-qte-perdue').value, 10) || 0, max - bonne - endommagee);
+            const observation = row.querySelector('.retour-obs').value.trim();
+            const total = bonne + endommagee + perdue;
+            if (total > 0) {
+                lignes.push({ article_code: article, quantite_bonne: bonne, quantite_endommagee: endommagee, quantite_perdue: perdue, observation_ligne_retour: observation || null });
+            }
         });
         if (!lignes.length) { this.toast('Indiquez les quantités retournées', 'error'); return; }
         const btn = e.target.querySelector('button[type="submit"]');
         this.setButtonLoading(btn, true);
         try {
-            await this.api('/locations/retour', { method: 'POST', body: JSON.stringify({ code, lignes }) });
+            const result = await this.api('/locations/retour', { method: 'POST', body: JSON.stringify({ code, lignes }) });
             this.closeRetour();
             this.toast('Retour enregistré', 'success');
             this.openLocationDetail(code);

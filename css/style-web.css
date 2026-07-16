@@ -537,6 +537,52 @@
         box-shadow: 0 0 0 3px var(--primary-light);
     }
 
+    .retour-ligne {
+        margin-bottom: 18px;
+    }
+
+    .retour-qte-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+    }
+
+    .retour-qte-grid input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        background: var(--white);
+        color: var(--text);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .retour-qte-grid input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .retour-obs {
+        width: 100%;
+        padding: 10px 14px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px;
+        background: var(--white);
+        color: var(--text);
+        margin-top: 8px;
+    }
+
+    .retour-obs:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
     /* BUTTONS */
     .btn {
         display: inline-flex;

@@ -40,12 +40,14 @@ class LocationController extends Controller
         $client = Client::findByCode($location['client_code']);
         $lignes = LigneLocation::findByLocation($code);
         $paiements = Paiement::allByLocation($code);
+        $retours = Retour::allByLocation($code);
 
         Response::success('Détail location', [
             'location' => $location,
             'client' => $client,
             'lignes' => $lignes,
             'paiements' => $paiements,
+            'retours' => $retours,
         ]);
     }
 
@@ -157,23 +159,45 @@ class LocationController extends Controller
         }
 
         $lignesValidees = [];
+        $totalRendu = 0;
         foreach ($lignes as $l) {
             $articleCode = trim($l['article_code'] ?? '');
-            $quantite = (int) ($l['quantite'] ?? 0);
-            if (!$articleCode || $quantite <= 0) {
+            $bonne = (int) ($l['quantite_bonne'] ?? 0);
+            $endommagee = (int) ($l['quantite_endommagee'] ?? 0);
+            $perdue = (int) ($l['quantite_perdue'] ?? 0);
+            $observation = trim($l['observation_ligne_retour'] ?? '');
+            $totalLigne = $bonne + $endommagee + $perdue;
+
+            if (!$articleCode || $totalLigne <= 0) {
                 continue;
             }
+
             $lignesValidees[] = [
                 'article_code' => $articleCode,
-                'quantite' => $quantite,
+                'quantite_bonne' => $bonne,
+                'quantite_endommagee' => $endommagee,
+                'quantite_perdue' => $perdue,
+                'observation_ligne_retour' => $observation ?: null,
             ];
+            $totalRendu += $totalLigne;
         }
         if (count($lignesValidees) === 0) {
             Response::error('Aucune quantité valide');
         }
 
-        $location = Location::retour($code, $lignesValidees);
-        Response::success('Retour enregistré', ['location' => $location]);
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('SELECT SUM(quantite_ligne_location) as total FROM ligne_locations WHERE location_code = :code');
+        $stmt->execute(['code' => $code]);
+        $totalLivre = (int) $stmt->fetchColumn();
+
+        $statutRetour = ($totalRendu >= $totalLivre) ? 'termine' : 'partiel';
+        if ($totalRendu > $totalLivre) {
+            Response::error('Les quantités retournées dépassent les quantités louées', [], 400);
+        }
+        $retourCode = 'RET' . time() . mt_rand(100, 999);
+
+        $location = Location::retour($code, $lignesValidees, $retourCode, $shop['code_boutique'], $user['code_user'], $statutRetour);
+        Response::success('Retour enregistré', ['location' => $location, 'retour_code' => $retourCode]);
     }
 
     public function addPaiement(): void

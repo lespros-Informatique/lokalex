@@ -12,6 +12,8 @@ require_once __DIR__ . '/models/Client.php';
 require_once __DIR__ . '/models/Location.php';
 require_once __DIR__ . '/models/LigneLocation.php';
 require_once __DIR__ . '/models/Paiement.php';
+require_once __DIR__ . '/models/Retour.php';
+require_once __DIR__ . '/models/LigneRetour.php';
 require_once __DIR__ . '/models/Forfait.php';
 require_once __DIR__ . '/models/Abonnement.php';
 require_once __DIR__ . '/controllers/AuthController.php';
