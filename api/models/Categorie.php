@@ -4,12 +4,19 @@ require_once __DIR__ . '/../core/Database.php';
 
 class Categorie
 {
-    public static function all(string $boutiqueCode): array
+    public static function all(?string $boutiqueCode = null): array
     {
-        $stmt = Database::getConnection()->prepare(
-            'SELECT * FROM categories WHERE boutique_code = :boutique_code ORDER BY libelle_categorie ASC'
-        );
-        $stmt->execute(['boutique_code' => $boutiqueCode]);
+        if ($boutiqueCode) {
+            $stmt = Database::getConnection()->prepare(
+                'SELECT * FROM categories WHERE boutique_code = :boutique_code ORDER BY libelle_categorie ASC'
+            );
+            $stmt->execute(['boutique_code' => $boutiqueCode]);
+        } else {
+            $stmt = Database::getConnection()->prepare(
+                'SELECT * FROM categories ORDER BY libelle_categorie ASC'
+            );
+            $stmt->execute();
+        }
         return $stmt->fetchAll();
     }
 
@@ -29,7 +36,7 @@ class Categorie
         );
         $stmt->execute([
             'code_categorie' => $data['code_categorie'],
-            'boutique_code' => $data['boutique_code'],
+            'boutique_code' => $data['boutique_code'] ?? null,
             'libelle_categorie' => $data['libelle_categorie'],
             'statut_categorie' => $data['statut_categorie'] ?? 'actif',
             'created_at_categorie' => $data['created_at_categorie'],

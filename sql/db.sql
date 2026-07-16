@@ -102,7 +102,7 @@ DROP TABLE IF EXISTS `categories`;
 CREATE TABLE IF NOT EXISTS `categories` (
   `id_categorie` int NOT NULL AUTO_INCREMENT,
   `code_categorie` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `boutique_code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `boutique_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `libelle_categorie` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `statut_categorie` enum('actif','inactif') COLLATE utf8mb4_unicode_ci DEFAULT 'actif',
   `created_at_categorie` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

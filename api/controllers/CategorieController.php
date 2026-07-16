@@ -6,12 +6,8 @@ class CategorieController extends Controller
 {
     public function index(): void
     {
-        $user = $this->requireActiveSubscription();
-        $shop = Shop::findByUserCode($user['code_user']);
-        if (!$shop) {
-            Response::error('Boutique introuvable', [], 404);
-        }
-        $categories = Categorie::all($shop['code_boutique']);
+        $this->requireActiveSubscription();
+        $categories = Categorie::all();
         $total = count($categories);
         $params = $this->paginationParams();
         $items = array_slice($categories, $params['offset'], $params['limit']);
@@ -21,11 +17,7 @@ class CategorieController extends Controller
     public function store(): void
     {
         $this->requireCsrf();
-        $user = $this->requireActiveSubscription();
-        $shop = Shop::findByUserCode($user['code_user']);
-        if (!$shop) {
-            Response::error('Boutique introuvable', [], 404);
-        }
+        $this->requireActiveSubscription();
 
         $libelle = trim($this->input('libelle', $this->input('libelle_categorie', '')));
         if (!$libelle) {
@@ -34,7 +26,7 @@ class CategorieController extends Controller
 
         $categorie = Categorie::create([
             'code_categorie' => 'CAT' . time() . mt_rand(100, 999),
-            'boutique_code' => $shop['code_boutique'],
+            'boutique_code' => null,
             'libelle_categorie' => $libelle,
             'statut_categorie' => 'actif',
             'created_at_categorie' => date('Y-m-d H:i:s'),
