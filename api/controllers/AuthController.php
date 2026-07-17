@@ -21,9 +21,9 @@ class AuthController extends Controller
 
         $token = Auth::generateToken($user['telephone_user']);
         $csrfToken = Auth::generateCsrfToken();
-        setcookie('nafa_token', $token, time() + 86400 * 30, '/', '', false, false);
-        setcookie('nafa_user', Auth::signCookieData($user), time() + 86400 * 30, '/', '', false, false);
-        setcookie('XSRF-TOKEN', $csrfToken, time() + 86400 * 30, '/', '', false, false);
+        Auth::setCookie('lokalex_token', $token, Auth::getTokenTtl(), true);
+        Auth::setCookie('lokalex_user', Auth::signCookieData($user), Auth::getTokenTtl(), true);
+        Auth::setCookie('XSRF-TOKEN', $csrfToken, Auth::getTokenTtl(), false);
 
         Logger::auth('Login success', ['user_code' => $user['code_user'], 'phone' => $phone]);
 
@@ -39,17 +39,22 @@ class AuthController extends Controller
     {
         $user = $this->requireAuth();
         $shop = Shop::findByUserCode($user['code_user']);
-        Response::success('Utilisateur connecté', [
+        $response = [
             'user' => $user,
             'shop' => $shop,
-        ]);
+        ];
+        if (isset($user['_new_token'])) {
+            $response['token'] = $user['_new_token'];
+        }
+        Response::success('Utilisateur connecté', $response);
     }
 
     public function logout(): void
     {
-        setcookie('nafa_token', '', time() - 3600, '/');
-        setcookie('nafa_user', '', time() - 3600, '/');
-        setcookie('XSRF-TOKEN', '', time() - 3600, '/');
+        $this->requireCsrf();
+        Auth::clearCookie('lokalex_token');
+        Auth::clearCookie('lokalex_user');
+        Auth::clearCookie('XSRF-TOKEN');
         Response::success('Déconnexion réussie');
     }
 }

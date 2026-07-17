@@ -92,20 +92,44 @@ const app = {
     init() {
         this.setupEventListeners();
         const saved = localStorage.getItem('lokalex_session');
-        if (saved) {
+        const token = this.getAuthToken();
+        if (saved && token) {
             const s = JSON.parse(saved);
             this.currentUser = s.user;
             this.currentShop = s.shop || null;
-            const isDev = this.currentUser && this.currentUser.role_user === 'developpeur';
-            document.querySelectorAll('.dev-only').forEach(el => el.style.display = isDev ? '' : 'none');
-            document.querySelectorAll('.dev-hidden').forEach(el => el.style.display = isDev ? 'none' : '');
-            const menuBtn = document.getElementById('top-menu-btn');
-            if (menuBtn) menuBtn.style.display = isDev ? 'flex' : 'none';
+            this.applyRoleUi();
             const hash = window.location.hash.replace('#', '');
             this.navigate(hash || 'dashboard');
+            this.syncSession();
         } else {
+            this.clearSession();
             const hash = window.location.hash.replace('#', '');
             this.navigate(hash || 'login');
+        }
+    },
+
+    applyRoleUi() {
+        const isDev = this.currentUser && this.currentUser.role_user === 'developpeur';
+        document.querySelectorAll('.dev-only').forEach(el => el.style.display = isDev ? '' : 'none');
+        document.querySelectorAll('.dev-hidden').forEach(el => el.style.display = isDev ? 'none' : '');
+        const menuBtn = document.getElementById('top-menu-btn');
+        if (menuBtn) menuBtn.style.display = isDev ? 'flex' : 'none';
+    },
+
+    async syncSession() {
+        try {
+            const data = await this.api('/auth/me');
+            this.currentUser = data.data.user;
+            this.currentShop = data.data.shop || null;
+            if (data.data.token) {
+                localStorage.setItem('lokalex_token', data.data.token);
+            }
+            this.saveSession();
+            this.applyRoleUi();
+        } catch (err) {
+            if (err.code === 'UNAUTHORIZED') return;
+            this.toast('Impossible de restaurer la session', 'error');
+            this.handleSessionExpired();
         }
     },
 
@@ -249,6 +273,7 @@ const app = {
                 signal: controller.signal,
             });
             clearTimeout(timeoutId);
+            this.captureNewToken(response);
             const text = await response.text();
             let data;
             try {
@@ -265,6 +290,8 @@ const app = {
                 } else if (err.code === 'SUBSCRIPTION_EXPIRED') {
                     this.subscriptionMode = 'expired';
                     this.navigate('subscription');
+                } else if (err.code === 'UNAUTHORIZED') {
+                    this.handleSessionExpired();
                 }
                 throw err;
             }
@@ -295,10 +322,29 @@ const app = {
     },
 
     getAuthToken() {
-        const cookieMatch = document.cookie.match(/nafa_token=([^;]+)/);
-        if (cookieMatch) return cookieMatch[1];
-        const stored = localStorage.getItem('lokalex_token');
-        return stored ? stored : null;
+        return localStorage.getItem('lokalex_token');
+    },
+
+    captureNewToken(response) {
+        const newToken = response.headers.get('X-New-Token');
+        if (newToken) {
+            localStorage.setItem('lokalex_token', newToken);
+        }
+    },
+
+    handleSessionExpired() {
+        if (this._sessionExpired) return;
+        this._sessionExpired = true;
+        this.clearSession();
+        this.toast('Votre session a expiré, veuillez vous reconnecter', 'error');
+        this.navigate('login');
+    },
+
+    clearSession() {
+        this.currentUser = null;
+        this.currentShop = null;
+        localStorage.removeItem('lokalex_session');
+        localStorage.removeItem('lokalex_token');
     },
 
     getCsrfToken() {
@@ -379,6 +425,8 @@ const app = {
 
     saveSession() {
         localStorage.setItem('lokalex_session', JSON.stringify({ user: this.currentUser, shop: this.currentShop }));
+        const token = this.getAuthToken();
+        if (token) localStorage.setItem('lokalex_token', token);
     },
 
     async logout() {
@@ -389,10 +437,8 @@ const app = {
             await this.api('/auth/logout', { method: 'POST' });
         } catch (e) { /* ignore */ }
         finally {
-            this.currentUser = null;
-            this.currentShop = null;
-            localStorage.removeItem('lokalex_session');
-            localStorage.removeItem('lokalex_token');
+            this.clearSession();
+            this._sessionExpired = false;
             this.navigate('login');
             this.toast('Déconnexion réussie', 'success');
             this.setButtonLoading(menuBtn, false);

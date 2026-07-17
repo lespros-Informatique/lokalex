@@ -44,29 +44,44 @@ abstract class Controller
     {
         $headers = getallheaders();
         $token = $headers['Authorization'] ?? $headers['authorization'] ?? null;
-        if (!$token && isset($_COOKIE['nafa_user'])) {
-            $userData = Auth::verifyCookieData($_COOKIE['nafa_user']);
+        if (!$token && isset($_COOKIE['lokalex_user'])) {
+            $userData = Auth::verifyCookieData($_COOKIE['lokalex_user']);
             if ($userData && isset($userData['telephone_user'])) {
                 return $userData;
             }
         }
         if (!$token) {
             Logger::auth('Auth failed: no token provided');
-            Response::error('Non autorisé', [], 401);
+            Response::unauthorized('Non autorisé');
         }
         $token = preg_replace('/^Bearer\s+/i', '', $token);
         $decoded = Auth::validateToken($token);
         if (!$decoded) {
             Logger::auth('Auth failed: invalid token');
-            Response::error('Token invalide ou expiré', [], 401);
+            Response::unauthorized('Token invalide ou expiré');
         }
         $user = User::findByPhone($decoded['phone']);
         if (!$user) {
             Logger::auth('Auth failed: user not found', ['phone' => $decoded['phone']]);
-            Response::error('Utilisateur introuvable', [], 401);
+            Response::unauthorized('Utilisateur introuvable');
         }
         Logger::auth('Auth success', ['user_code' => $user['code_user']]);
+
+        $ttl = Auth::getTokenTtl();
+        $remaining = $decoded['exp'] - time();
+        if ($remaining < ($ttl / 2)) {
+            $newToken = Auth::generateToken($user['telephone_user']);
+            $this->rotateToken($newToken);
+            $user['_new_token'] = $newToken;
+        }
+
         return $user;
+    }
+
+    protected function rotateToken(string $token): void
+    {
+        Auth::setCookie('lokalex_token', $token, Auth::getTokenTtl(), true);
+        header('X-New-Token: ' . $token);
     }
 
     protected function requireActiveSubscription(): array

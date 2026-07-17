@@ -56,8 +56,8 @@ api/
 | GET | `/api/search` | Recherche de locations |
 
 ## Authentification
-- Header : `Authorization: Bearer <base64(phone:timestamp)>`
-- Ou cookie : `nafa_user` (stocké en base64)
+- Header : `Authorization: Bearer <token>`
+- Ou cookie : `lokalex_user` (signé HMAC, HttpOnly)
 
 ## Base de données
 Utilise `sql/db.sql` (base `db_location`) comme seule source de vérité.

@@ -84,7 +84,7 @@ C:\wamp64\www\location\
 |---|---------|----------|----------|
 | 1 | `api/index.php` | Route `/history/delete` absente mais appelée par le frontend (`app.js:1606`) | 🔴 Bloque une fonctionnalité |
 | 2 | `api/core/Auth.php` | Token = `base64(phone:timestamp)` sans validation d'expiration côté serveur | 🟠 Sécurité MVP |
-| 3 | `api/core/Controller.php:33-37` | Cookie `nafa_user` accepté sans vérification de signature | 🟠 Sécurité MVP |
+| 3 | `api/core/Controller.php:33-37` | Cookie `lokalex_user` accepté sans vérification de signature | 🟠 Sécurité MVP |
 | 4 | `api/core/Controller.php` | `getallheaders()` peut échouer sous CGI/FastCGI | 🟡 Compatibilité |
 | 5 | `api/models/Location.php:186-187` | `Location::stats()` utilise `CURDATE()` pour les retards au lieu du `$date` passé | 🟡 Bug mineur |
 | 6 | `api/controllers/HistoryController.php` | Pas de pagination — charge toutes les locations | 🟡 Performance |
@@ -121,7 +121,7 @@ C:\wamp64\www\location\
 | Injection SQL | ✅ | PDO prepared statements systématiques |
 | XSS | ✅ | escapeHtml() sur toutes les sorties serveur |
 | Auth token | 🟠 | Base64(phone:timestamp) — pas de signature, pas d'expiry serveur |
-| Cookies | 🟠 | `nafa_user` contient données user en base64 sans signature |
+| Cookies | 🟠 | `lokalex_user` contient données user signées HMAC (HttpOnly) |
 | CORS | ✅ | Headers `Access-Control-Allow-Origin: *` (OK pour SPA same-origin) |
 | CSRF | 🟠 | Absent (mitigé par SPA + JSON only) |
 | Rate limiting | 🟠 | Absent |

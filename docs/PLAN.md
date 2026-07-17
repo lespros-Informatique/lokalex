@@ -115,7 +115,7 @@ WHERE boutique_code = :b AND statut_location = 'en_cours'
 
 **Général**
 - Titre/logo `NAFA` → `LOKALEX` (utiliser `images/lokalex-icon.png` déjà présent).
-- `localStorage` clé `nafa_session` → `lokalex_session` (cohérence).
+- `localStorage` clé `lokalex_session` (cohérence).
 - Retirer `devise_boutique` partout.
 
 **Pages à remplacer**

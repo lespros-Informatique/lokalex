@@ -30,4 +30,10 @@ class Response
             'data' => $data,
         ], $statusCode);
     }
+
+    public static function unauthorized(string $message = 'Session expirée', array $data = [], int $statusCode = 401): void
+    {
+        $data = array_merge(['code' => 'UNAUTHORIZED'], $data);
+        self::error($message, $data, $statusCode);
+    }
 }
